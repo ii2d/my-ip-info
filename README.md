@@ -133,6 +133,21 @@ pnpm deploy:all
 
 ---
 
+### Option 5: Deploy Web UI to Cloudflare Pages
+
+Deploy the React + Vite frontend dashboard to Cloudflare Pages:
+
+```bash
+pnpm deploy:web
+```
+
+To bind a custom domain like `ip.yourdomain.com`:
+1. In Cloudflare Dashboard, go to **Workers & Pages** -> **my-ip-info**.
+2. Navigate to **Custom domains** tab -> **Set up a domain**.
+3. Enter `ip.yourdomain.com` and click **Activate domain**. Cloudflare automatically adds the DNS CNAME record and provisions SSL.
+
+---
+
 ## 🗑️ Teardown & Destruction Guide
 
 Tear down deployed serverless services and automatically clean up `apps/web/.env.local`:
@@ -145,6 +160,7 @@ pnpm destroy:all
 pnpm destroy:cloudflare
 pnpm destroy:lambda
 pnpm destroy:firebase
+pnpm destroy:web
 
 # Non-interactive / CI teardown
 pnpm destroy:all -- --force

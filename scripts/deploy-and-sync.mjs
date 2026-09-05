@@ -123,7 +123,9 @@ if (runAll || isCloudflareOnly) {
 
   try {
     const cfDir = path.resolve(rootDir, 'apps', 'server-cloudflare');
-    const output = runCmd('npx wrangler deploy', { cwd: cfDir });
+    const workerName = process.env.CLOUDFLARE_WORKER_NAME || 'my-ip-info';
+    console.log(`   Deploying Worker under name: '${workerName}'...`);
+    const output = runCmd(`npx wrangler deploy --name ${workerName}`, { cwd: cfDir });
     console.log(output);
 
     const match = output.match(/https:\/\/[a-zA-Z0-9-_\.]+\.workers\.dev/);

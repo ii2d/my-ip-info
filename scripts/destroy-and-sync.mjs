@@ -22,8 +22,9 @@ const isForce = args.includes('--force') || args.includes('-y') || args.includes
 const isCloudflareOnly = args.includes('--cloudflare-only');
 const isFirebaseOnly = args.includes('--firebase-only');
 const isLambdaOnly = args.includes('--lambda-only');
+const isWebOnly = args.includes('--web-only') || args.includes('--pages-only');
 
-const destroyAll = !isCloudflareOnly && !isFirebaseOnly && !isLambdaOnly;
+const destroyAll = !isCloudflareOnly && !isFirebaseOnly && !isLambdaOnly && !isWebOnly;
 
 // =============================================================================
 // 1. Environment Loading (.env & .env.local)
@@ -107,6 +108,7 @@ async function confirmTeardown() {
   if (destroyAll || isCloudflareOnly) targets.push('Cloudflare Worker');
   if (destroyAll || isFirebaseOnly) targets.push('Firebase Function');
   if (destroyAll || isLambdaOnly) targets.push('AWS Lambda');
+  if (destroyAll || isWebOnly) targets.push('Cloudflare Pages (Web Dashboard)');
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -141,10 +143,12 @@ async function main() {
     console.log('\n🧹 [1/3] Destroying Cloudflare Worker (apps/server-cloudflare)...');
     const cfDir = path.resolve(rootDir, 'apps', 'server-cloudflare');
     try {
-      const output = runCmd('npx wrangler delete --force', { cwd: cfDir });
+      const workerName = process.env.CLOUDFLARE_WORKER_NAME || 'my-ip-info';
+      console.log(`   Deleting Cloudflare Worker '${workerName}'...`);
+      const output = runCmd(`npx wrangler delete ${workerName} --force`, { cwd: cfDir });
       console.log(output);
       endpoints.VITE_CLOUDFLARE_URL = '';
-      console.log('✅ Cloudflare Worker removed.');
+      console.log(`✅ Cloudflare Worker '${workerName}' removed.`);
     } catch (err) {
       console.warn('⚠️ Could not delete Cloudflare Worker (it may not exist or wrangler is unauthenticated).');
       if (err.stdout) console.log(err.stdout);
@@ -209,6 +213,25 @@ async function main() {
       console.log(`✅ IAM execution role '${roleName}' deleted.`);
     } catch {
       // Role may be shared or not exist, ignore
+    }
+  }
+
+  // ===========================================================================
+  // 5. Destroy Cloudflare Pages (apps/web)
+  // ===========================================================================
+  if (destroyAll || isWebOnly) {
+    console.log('\n🧹 [4/4] Destroying Cloudflare Pages (apps/web)...');
+    const projectName = process.env.CLOUDFLARE_PAGES_PROJECT_NAME || 'my-ip-info';
+    try {
+      console.log(`   Deleting Cloudflare Pages project '${projectName}'...`);
+      const output = runCmd(`npx wrangler pages project delete ${projectName} --yes`, {
+        cwd: rootDir,
+      });
+      console.log(output);
+      console.log(`✅ Cloudflare Pages project '${projectName}' deleted.`);
+    } catch (err) {
+      console.warn(`⚠️ Could not delete Cloudflare Pages project '${projectName}' (it may not exist).`);
+      if (err.stdout) console.log(err.stdout);
     }
   }
 
