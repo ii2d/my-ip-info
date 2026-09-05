@@ -1,0 +1,19 @@
+{
+  "name": "@my-ip/server-lambda",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --out-dir dist",
+    "deploy": "pnpm build && echo 'Deploy with AWS SAM or serverless deploy'"
+  },
+  "dependencies": {
+    "@my-ip/core": "workspace:*",
+    "hono": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "my-ip-info-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Open-source multi-source IP intelligence and connectivity diagnostic suite",
+  "scripts": {
+    "dev": "pnpm --filter @my-ip/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "deploy:cloudflare": "pnpm --filter @my-ip/server-cloudflare deploy",
+    "deploy:firebase": "pnpm --filter @my-ip/server-firebase deploy",
+    "deploy:all": "node scripts/deploy-and-sync.mjs",
+    "sync:endpoints": "node scripts/deploy-and-sync.mjs --sync-only"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  },
+  "packageManager": "pnpm@11.8.0"
+}

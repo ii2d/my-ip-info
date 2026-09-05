@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+.wrangler/
+.firebase/
+.turbo/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Pulumi stacks (keep example only)
+infra/Pulumi.*.yaml
+!infra/Pulumi.example.yaml
+!infra/Pulumi.yaml
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

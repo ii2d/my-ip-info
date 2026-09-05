@@ -1,0 +1,22 @@
+{
+  "name": "@my-ip/server-node",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format cjs --out-dir dist"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@my-ip/core": "workspace:*",
+    "hono": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

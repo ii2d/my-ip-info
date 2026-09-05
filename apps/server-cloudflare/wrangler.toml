@@ -1,0 +1,9 @@
+name = "my-ip-info"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Un-comment to bind a custom route or custom domain:
+# routes = [
+#   { pattern = "ip.example.com", custom_domain = true }
+# ]
