@@ -9,6 +9,7 @@
     "test": "pnpm -r test",
     "deploy:cloudflare": "pnpm --filter @my-ip/server-cloudflare deploy",
     "deploy:firebase": "pnpm --filter @my-ip/server-firebase deploy",
+    "deploy:lambda": "node scripts/deploy-and-sync.mjs --lambda-only",
     "deploy:all": "node scripts/deploy-and-sync.mjs",
     "sync:endpoints": "node scripts/deploy-and-sync.mjs --sync-only"
   },

@@ -3,9 +3,8 @@
 /**
  * deploy-and-sync.mjs
  * 
- * Orchestrates serverless deployments and synchronizes assigned endpoint URLs
- * directly into apps/web/.env.local so the Web UI immediately communicates with
- * your deployed clouds without manual copy-pasting.
+ * Orchestrates multi-cloud serverless deployments (Cloudflare Workers, Firebase Functions,
+ * AWS Lambda) and synchronizes assigned endpoint URLs directly into apps/web/.env.local.
  */
 
 import { execSync } from 'node:child_process';
@@ -18,6 +17,11 @@ const rootDir = path.resolve(__dirname, '..');
 const webEnvPath = path.resolve(rootDir, 'apps', 'web', '.env.local');
 
 const isSyncOnly = process.argv.includes('--sync-only');
+const isCloudflareOnly = process.argv.includes('--cloudflare-only');
+const isFirebaseOnly = process.argv.includes('--firebase-only');
+const isLambdaOnly = process.argv.includes('--lambda-only');
+
+const runAll = !isSyncOnly && !isCloudflareOnly && !isFirebaseOnly && !isLambdaOnly;
 
 // =============================================================================
 // 1. Environment Loading (.env & .env.local)
@@ -32,12 +36,10 @@ function loadEnvFiles() {
 
     loadedFiles.push(file);
 
-    // Try Node.js built-in process.loadEnvFile (Node >= 20.6.0)
     if (typeof process.loadEnvFile === 'function') {
       try {
         process.loadEnvFile(fullPath);
       } catch {
-        // Fall back to line parser if loadEnvFile encountered format issues
         parseAndLoadEnv(fullPath);
       }
     } else {
@@ -69,13 +71,13 @@ function parseAndLoadEnv(filePath) {
 
 const loadedEnvFiles = loadEnvFiles();
 
-console.log('🚀 my-ip-info Deployment & Endpoint Sync Utility');
-console.log('─'.repeat(60));
+console.log('🚀 my-ip-info Multi-Cloud Deployment & Endpoint Sync Utility');
+console.log('─'.repeat(65));
 
 if (loadedEnvFiles.length > 0) {
-  console.log(`📁 Loaded environment files: ${loadedEnvFiles.join(', ')}`);
+  console.log(`📁 Loaded environment file(s): ${loadedEnvFiles.join(', ')}`);
 } else {
-  console.log('ℹ️  No root .env or .env.local found. Using current system environment.');
+  console.log('ℹ️  No root .env or .env.local found. Using system environment variables.');
 }
 
 const endpoints = {
@@ -98,32 +100,36 @@ if (fs.existsSync(webEnvPath)) {
   }
 }
 
+// Helper to run commands with inherited env
+function runCmd(cmd, options = {}) {
+  return execSync(cmd, {
+    encoding: 'utf8',
+    env: process.env,
+    ...options,
+  });
+}
+
 // =============================================================================
 // 2. Deploy Cloudflare Worker (apps/server-cloudflare)
 // =============================================================================
-if (!isSyncOnly) {
-  console.log('\n📦 [1/2] Deploying Cloudflare Worker (apps/server-cloudflare)...');
+if (runAll || isCloudflareOnly) {
+  console.log('\n📦 [1/3] Deploying Cloudflare Worker (apps/server-cloudflare)...');
 
   if (!process.env.CLOUDFLARE_ACCOUNT_ID) {
     console.log('   ℹ️  CLOUDFLARE_ACCOUNT_ID is not set in .env.');
     console.log('      If you have multiple Cloudflare accounts, set it in .env to prevent prompts.');
-    console.log('      Run `npx wrangler whoami` to find your account IDs.\n');
+    console.log('      Run `npx wrangler whoami` to list your accounts.\n');
   }
 
   try {
     const cfDir = path.resolve(rootDir, 'apps', 'server-cloudflare');
-    const output = execSync('npx wrangler deploy', {
-      cwd: cfDir,
-      encoding: 'utf8',
-      env: process.env,
-    });
+    const output = runCmd('npx wrangler deploy', { cwd: cfDir });
     console.log(output);
 
-    // Extract https://*.workers.dev from output
     const match = output.match(/https:\/\/[a-zA-Z0-9-_\.]+\.workers\.dev/);
     if (match) {
       endpoints.VITE_CLOUDFLARE_URL = match[0];
-      console.log(`✅ Detected Cloudflare Worker URL: ${endpoints.VITE_CLOUDFLARE_URL}`);
+      console.log(`✅ Cloudflare Worker URL: ${endpoints.VITE_CLOUDFLARE_URL}`);
     }
   } catch (err) {
     console.warn('⚠️ Cloudflare deployment failed or was cancelled.');
@@ -131,11 +137,13 @@ if (!isSyncOnly) {
     if (err.stderr) console.error(err.stderr);
     console.warn('👉 Action needed: Check your Cloudflare credentials (`npx wrangler login`) or account ID in .env.\n');
   }
+}
 
-  // ===========================================================================
-  // 3. Deploy Firebase Functions (apps/server-firebase)
-  // ===========================================================================
-  console.log('\n📦 [2/2] Deploying Firebase Function (apps/server-firebase)...');
+// =============================================================================
+// 3. Deploy Firebase Functions (apps/server-firebase)
+// =============================================================================
+if (runAll || isFirebaseOnly) {
+  console.log('\n📦 [2/3] Deploying Firebase Function (apps/server-firebase)...');
   const fbDir = path.resolve(rootDir, 'apps', 'server-firebase');
   const fbRcPath = path.resolve(fbDir, '.firebaserc');
 
@@ -145,7 +153,7 @@ if (!isSyncOnly) {
   if (!firebaseProject && !hasFirebaseRc) {
     console.warn('⚠️  Firebase deployment skipped: Missing Firebase Project configuration.');
     console.warn('   ─────────────────────────────────────────────────────────────');
-    console.warn('   To deploy Firebase Functions, you need a project configured:');
+    console.warn('   To deploy Firebase Functions:');
     console.warn('   1. Set FIREBASE_PROJECT=<your-project-id> in your root .env file');
     console.warn('      OR run: cd apps/server-firebase && npx firebase-tools use --add');
     console.warn('   2. Authenticate locally with: npx firebase-tools login');
@@ -157,18 +165,13 @@ if (!isSyncOnly) {
       const deployCommand = `pnpm build && npx firebase-tools deploy --only functions${projectArg}`;
 
       console.log(`   Running: ${deployCommand}...`);
-      const output = execSync(deployCommand, {
-        cwd: fbDir,
-        encoding: 'utf8',
-        env: process.env,
-      });
+      const output = runCmd(deployCommand, { cwd: fbDir });
       console.log(output);
 
-      // Extract https://*.cloudfunctions.net/api or region URL
       const match = output.match(/https:\/\/[a-zA-Z0-9-_\.]+\.cloudfunctions\.net\/api/);
       if (match) {
         endpoints.VITE_FIREBASE_URL = match[0];
-        console.log(`✅ Detected Firebase Function URL: ${endpoints.VITE_FIREBASE_URL}`);
+        console.log(`✅ Firebase Function URL: ${endpoints.VITE_FIREBASE_URL}`);
       }
     } catch (err) {
       console.warn('⚠️ Firebase deployment failed.');
@@ -176,14 +179,118 @@ if (!isSyncOnly) {
       if (err.stderr) console.error(err.stderr);
       console.warn('👉 Action needed:');
       console.warn('   - Ensure you are logged in via: npx firebase-tools login');
-      console.warn('   - Verify FIREBASE_PROJECT in .env matches a project in your Google Cloud account.');
-      console.warn('   - Ensure Cloud Functions API and Cloud Build API are enabled on Blaze plan.\n');
+      console.warn('   - Verify FIREBASE_PROJECT in .env exists and billing (Blaze plan) is active.\n');
     }
   }
 }
 
 // =============================================================================
-// 4. Write synced variables to apps/web/.env.local
+// 4. Deploy AWS Lambda (apps/server-lambda)
+// =============================================================================
+if (runAll || isLambdaOnly) {
+  console.log('\n📦 [3/3] Deploying AWS Lambda (apps/server-lambda)...');
+
+  const lambdaDir = path.resolve(rootDir, 'apps', 'server-lambda');
+  const distDir = path.resolve(lambdaDir, 'dist');
+  const zipPath = path.resolve(distDir, 'function.zip');
+
+  const profile = process.env.AWS_PROFILE ? `--profile ${process.env.AWS_PROFILE}` : '';
+  const region = process.env.AWS_REGION || 'us-east-1';
+  const regionFlag = `--region ${region}`;
+  const functionName = process.env.AWS_LAMBDA_FUNCTION_NAME || 'my-ip-info';
+
+  // Check if AWS CLI is installed
+  let awsCliInstalled = false;
+  try {
+    runCmd('aws --version', { stdio: 'pipe' });
+    awsCliInstalled = true;
+  } catch {
+    console.warn('⚠️  AWS CLI is not installed or not in PATH.');
+    console.warn('   Install AWS CLI from https://aws.amazon.com/cli/ or deploy via Pulumi/CDK.\n');
+  }
+
+  if (awsCliInstalled) {
+    try {
+      // 1. Build lambda bundle
+      console.log('   Building Lambda bundle (tsup)...');
+      runCmd('pnpm build', { cwd: lambdaDir, stdio: 'pipe' });
+
+      // 2. Package function.zip
+      if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+      runCmd('zip -q function.zip index.js', { cwd: distDir });
+
+      // 3. Check if function exists
+      let functionExists = false;
+      try {
+        runCmd(`aws lambda get-function --function-name ${functionName} ${profile} ${regionFlag}`, { stdio: 'pipe' });
+        functionExists = true;
+      } catch {
+        functionExists = false;
+      }
+
+      if (functionExists) {
+        console.log(`   Updating existing function code for '${functionName}'...`);
+        runCmd(
+          `aws lambda update-function-code --function-name ${functionName} --zip-file fileb://${zipPath} ${profile} ${regionFlag}`,
+          { stdio: 'pipe' }
+        );
+      } else {
+        console.log(`   Creating new Lambda function '${functionName}'...`);
+        // Find or create execution role
+        const callerInfo = JSON.parse(runCmd(`aws sts get-caller-identity ${profile} ${regionFlag}`, { stdio: 'pipe' }));
+        const roleArn = process.env.AWS_LAMBDA_ROLE_ARN || `arn:aws:iam::${callerInfo.Account}:role/my-ip-info-lambda-role`;
+
+        runCmd(
+          `aws lambda create-function --function-name ${functionName} --runtime nodejs20.x --role ${roleArn} --handler index.handler --zip-file fileb://${zipPath} --timeout 10 --memory-size 256 ${profile} ${regionFlag}`,
+          { stdio: 'pipe' }
+        );
+
+        runCmd(`aws lambda wait function-active-v2 --function-name ${functionName} ${profile} ${regionFlag}`, { stdio: 'pipe' });
+
+        console.log('   Enabling public Lambda Function URL...');
+        runCmd(
+          `aws lambda create-function-url-config --function-name ${functionName} --auth-type NONE --cors '{"AllowOrigins":["*"],"AllowMethods":["*"],"AllowHeaders":["*"]}' ${profile} ${regionFlag}`,
+          { stdio: 'pipe' }
+        );
+
+        // Add public invoke permissions
+        try {
+          runCmd(
+            `aws lambda add-permission --function-name ${functionName} --statement-id FunctionURLAllowPublicAccess --action lambda:InvokeFunctionUrl --principal "*" --function-url-auth-type NONE ${profile} ${regionFlag}`,
+            { stdio: 'pipe' }
+          );
+        } catch {}
+
+        try {
+          runCmd(
+            `aws lambda add-permission --function-name ${functionName} --statement-id AllowPublicInvoke --action lambda:InvokeFunction --principal "*" ${profile} ${regionFlag}`,
+            { stdio: 'pipe' }
+          );
+        } catch {}
+      }
+
+      // 4. Query the Function URL
+      const urlConfigRaw = runCmd(
+        `aws lambda get-function-url-config --function-name ${functionName} ${profile} ${regionFlag}`,
+        { stdio: 'pipe' }
+      );
+      const urlConfig = JSON.parse(urlConfigRaw);
+
+      if (urlConfig.FunctionUrl) {
+        endpoints.VITE_LAMBDA_URL = urlConfig.FunctionUrl.replace(/\/$/, '');
+        console.log(`✅ AWS Lambda Function URL: ${endpoints.VITE_LAMBDA_URL}`);
+      }
+    } catch (err) {
+      console.warn('⚠️ AWS Lambda deployment failed.');
+      if (err.stdout) console.log(err.stdout);
+      if (err.stderr) console.error(err.stderr);
+      console.warn('👉 Action needed: Check AWS_PROFILE, AWS_REGION, or IAM permissions in your .env file.\n');
+    }
+  }
+}
+
+// =============================================================================
+// 5. Synchronize Endpoints into apps/web/.env.local
 // =============================================================================
 console.log('\n🔄 Synchronizing endpoints to Web frontend...');
 const envLines = [

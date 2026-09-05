@@ -4,8 +4,8 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs --out-dir dist",
-    "deploy": "pnpm build && echo 'Deploy with AWS SAM or serverless deploy'"
+    "build": "tsup",
+    "deploy": "node ../../scripts/deploy-and-sync.mjs --lambda-only"
   },
   "dependencies": {
     "@my-ip/core": "workspace:*",
