@@ -71,9 +71,25 @@ Visit `http://localhost:5173` in your browser.
 
 ## ☁️ Deployment Guide
 
-### Option 1: Cloudflare Worker (1-Click or CLI)
+### Provider Comparison
 
-Click the button below to deploy directly in your browser:
+| Provider | Geolocation & ASN | Latency | Free Tier Policy | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Cloudflare Workers** (⭐ **Recommended**) | **Built-in** (City, Region, Lat/Lon, ASN, ISP, Colo) | **< 15ms** (Global Anycast) | 100k req/day free (No credit card required) | ✅ **Fully Tested & Verified** |
+| **AWS Lambda** | IP & Headers only (Requires external DB for Geo) | ~50–200ms (Regional + cold start) | 1M req/mo free (AWS account required) | ✅ **Fully Tested & Verified** |
+| **Firebase Functions v2** | IP & Headers only | ~200–800ms | Requires **Blaze (Pay-as-you-go)** plan | ⚠️ **Not Yet Tested** |
+
+---
+
+### ⭐ Option 1: Cloudflare Workers (Recommended)
+
+> [!TIP]
+> **Why Cloudflare Workers is the recommended backend:**
+> 1. **Zero-Latency GeoIP & ASN**: Cloudflare's edge proxy automatically enriches `request.cf` with accurate coordinates, city, region, ASN (`AS6327`), ISP organization, and airport datacenter code (`colo: "YVR"`). No external GeoIP database or paid API keys needed!
+> 2. **Edge Performance**: Routed instantly to the nearest physical city across 300+ global edge locations without cold start delays.
+> 3. **No Credit Card Required**: Generous free tier (100,000 requests/day).
+
+Click the button below to deploy directly via your browser:
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/donilan/my-ip-info)
 
@@ -82,21 +98,34 @@ Or deploy via terminal:
 pnpm deploy:cloudflare
 ```
 
-### Option 2: Firebase Functions v2
+---
+
+### Option 2: AWS Lambda (Function URLs)
+
+Deploy as a standalone AWS Lambda function with a public, CORS-enabled Lambda Function URL:
+
+```bash
+pnpm deploy:lambda
+```
+*Requires AWS CLI configured with credentials (`AWS_PROFILE` in `.env`).*
+
+---
+
+### Option 3: Firebase Functions v2
+
+> [!WARNING]
+> **Maintainer Notice:** Firebase deployment has **not been tested yet**. 
+> Note that Google Cloud requires the project to be upgraded to the **Blaze (pay-as-you-go) plan** to enable the required Cloud Build and Artifact Registry APIs. It cannot be deployed on the free Spark plan. Community testing, verification, and PRs are welcome!
 
 ```bash
 pnpm deploy:firebase
 ```
 
-### Option 3: AWS Lambda (Function URLs)
-
-```bash
-pnpm deploy:lambda
-```
+---
 
 ### Option 4: Automated Multi-Cloud Deploy & Frontend Sync
 
-Run our built-in deployment script to deploy all targets and automatically write the assigned URLs into `apps/web/.env.local`:
+Run our built-in deployment script to deploy all configured targets and automatically write the assigned live URLs into `apps/web/.env.local`:
 
 ```bash
 pnpm deploy:all
