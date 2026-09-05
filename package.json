@@ -11,6 +11,11 @@
     "deploy:firebase": "pnpm --filter @my-ip/server-firebase deploy",
     "deploy:lambda": "node scripts/deploy-and-sync.mjs --lambda-only",
     "deploy:all": "node scripts/deploy-and-sync.mjs",
+    "destroy:cloudflare": "node scripts/destroy-and-sync.mjs --cloudflare-only",
+    "destroy:firebase": "node scripts/destroy-and-sync.mjs --firebase-only",
+    "destroy:lambda": "node scripts/destroy-and-sync.mjs --lambda-only",
+    "destroy:all": "node scripts/destroy-and-sync.mjs",
+    "destroy": "node scripts/destroy-and-sync.mjs",
     "sync:endpoints": "node scripts/deploy-and-sync.mjs --sync-only"
   },
   "devDependencies": {

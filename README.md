@@ -88,12 +88,37 @@ pnpm deploy:cloudflare
 pnpm deploy:firebase
 ```
 
-### Option 3: Automated Multi-Cloud Deploy & Frontend Sync
+### Option 3: AWS Lambda (Function URLs)
+
+```bash
+pnpm deploy:lambda
+```
+
+### Option 4: Automated Multi-Cloud Deploy & Frontend Sync
 
 Run our built-in deployment script to deploy all targets and automatically write the assigned URLs into `apps/web/.env.local`:
 
 ```bash
 pnpm deploy:all
+```
+
+---
+
+## 🗑️ Teardown & Destruction Guide
+
+Tear down deployed serverless services and automatically clean up `apps/web/.env.local`:
+
+```bash
+# Destroy all deployed services (interactive confirmation prompt)
+pnpm destroy:all
+
+# Or destroy specific providers
+pnpm destroy:cloudflare
+pnpm destroy:lambda
+pnpm destroy:firebase
+
+# Non-interactive / CI teardown
+pnpm destroy:all -- --force
 ```
 
 ---
