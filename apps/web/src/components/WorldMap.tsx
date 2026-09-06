@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import { MapPin, Navigation } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { ProviderResult } from '../types';
 
 interface WorldMapProps {
@@ -14,25 +14,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Extract all points with valid coordinates
-  const geoPoints = results
-    .filter(
-      (r) =>
-        r.status === 'success' &&
-        r.geo &&
-        typeof r.geo.latitude === 'number' &&
-        typeof r.geo.longitude === 'number' &&
-        !isNaN(r.geo.latitude) &&
-        !isNaN(r.geo.longitude)
-    )
-    .map((r) => ({
-      provider: r.providerName,
-      ip: r.ip,
-      lat: r.geo!.latitude!,
-      lng: r.geo!.longitude!,
-      city: r.geo!.city,
-      country: r.geo!.country,
-      asn: r.geo!.asn,
-    }));
+  const geoPoints = useMemo(() => {
+    return results
+      .filter(
+        (r) =>
+          r.status === 'success' &&
+          r.geo &&
+          typeof r.geo.latitude === 'number' &&
+          typeof r.geo.longitude === 'number' &&
+          !isNaN(r.geo.latitude) &&
+          !isNaN(r.geo.longitude)
+      )
+      .map((r) => ({
+        provider: r.providerName,
+        ip: r.ip,
+        lat: r.geo!.latitude!,
+        lng: r.geo!.longitude!,
+        city: r.geo!.city,
+        country: r.geo!.country,
+        asn: r.geo!.asn,
+      }));
+  }, [results]);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -120,11 +122,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
         markersLayer.addLayer(marker);
       });
 
-      map.fitBounds(bounds, {
-        padding: [50, 50],
-        maxZoom: 10,
-        animate: true,
-      });
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, {
+          padding: [50, 50],
+          maxZoom: 10,
+          animate: true,
+        });
+      }
     }
 
     return () => {

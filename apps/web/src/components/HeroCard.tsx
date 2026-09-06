@@ -9,6 +9,7 @@ interface HeroCardProps {
   geo?: GeoLocationInfo;
   avgLatency?: number;
   isRefreshing: boolean;
+  isInitialLoading?: boolean;
 }
 
 export const HeroCard: React.FC<HeroCardProps> = ({
@@ -17,6 +18,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
   geo,
   avgLatency,
   isRefreshing,
+  isInitialLoading = false,
 }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -52,30 +54,57 @@ export const HeroCard: React.FC<HeroCardProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <span className="pulse-dot" />
           <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-            Network Status: Active
+            {isInitialLoading ? 'Querying Network Interfaces...' : 'Network Status: Active'}
           </span>
+          {isRefreshing && !isInitialLoading && (
+            <span
+              className="badge badge-cyan"
+              style={{ fontSize: '0.6875rem', padding: '1px 7px' }}
+            >
+              Background Syncing...
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          {avgLatency !== undefined && (
-            <div className="badge badge-emerald">
-              <Zap size={13} />
-              <span>Avg Latency: {avgLatency} ms</span>
-            </div>
-          )}
+          {isInitialLoading ? (
+            <>
+              <div
+                className="skeleton"
+                style={{ width: '125px', height: '24px', borderRadius: 'var(--radius-full)' }}
+              />
+              <div
+                className="skeleton"
+                style={{ width: '100px', height: '24px', borderRadius: 'var(--radius-full)' }}
+              />
+              <div
+                className="skeleton"
+                style={{ width: '115px', height: '24px', borderRadius: 'var(--radius-full)' }}
+              />
+            </>
+          ) : (
+            <>
+              {avgLatency !== undefined && (
+                <div className="badge badge-emerald">
+                  <Zap size={13} />
+                  <span>Avg Latency: {avgLatency} ms</span>
+                </div>
+              )}
 
-          {geo?.colo && (
-            <div className="badge badge-cyan">
-              <Globe size={13} />
-              <span>Edge PoP: {geo.colo}</span>
-            </div>
-          )}
+              {geo?.colo && (
+                <div className="badge badge-cyan">
+                  <Globe size={13} />
+                  <span>Edge PoP: {geo.colo}</span>
+                </div>
+              )}
 
-          {geo?.asn && (
-            <div className="badge badge-amber">
-              <Shield size={13} />
-              <span>{geo.asn}</span>
-            </div>
+              {geo?.asn && (
+                <div className="badge badge-amber">
+                  <Shield size={13} />
+                  <span>{geo.asn}</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -135,11 +164,21 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               gap: '0.75rem',
             }}
           >
-            <span className="mono hero-ip-v4">
-              {ipv4 || (isRefreshing ? 'Checking...' : 'Not Detected')}
-            </span>
+            {isInitialLoading ? (
+              <div
+                className="skeleton"
+                style={{
+                  width: '160px',
+                  height: '26px',
+                  margin: '3px 0',
+                  borderRadius: 'var(--radius-sm)',
+                }}
+              />
+            ) : (
+              <span className="mono hero-ip-v4">{ipv4 || 'Not Detected'}</span>
+            )}
 
-            {ipv4 && (
+            {ipv4 && !isInitialLoading && (
               <button
                 className="btn btn-ghost btn-icon"
                 onClick={() => copyToClipboard(ipv4, 'ipv4')}
@@ -197,14 +236,26 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               gap: '0.75rem',
             }}
           >
-            <span
-              className="mono hero-ip-v6"
-              style={{ color: ipv6 ? 'var(--text-primary)' : 'var(--text-muted)' }}
-            >
-              {ipv6 || (isRefreshing ? 'Checking...' : 'No IPv6 Connectivity')}
-            </span>
+            {isInitialLoading ? (
+              <div
+                className="skeleton"
+                style={{
+                  width: '210px',
+                  height: '26px',
+                  margin: '3px 0',
+                  borderRadius: 'var(--radius-sm)',
+                }}
+              />
+            ) : (
+              <span
+                className="mono hero-ip-v6"
+                style={{ color: ipv6 ? 'var(--text-primary)' : 'var(--text-muted)' }}
+              >
+                {ipv6 || 'No IPv6 Connectivity'}
+              </span>
+            )}
 
-            {ipv6 && (
+            {ipv6 && !isInitialLoading && (
               <button
                 className="btn btn-ghost btn-icon"
                 onClick={() => copyToClipboard(ipv6, 'ipv6')}
@@ -229,34 +280,72 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           gap: '1rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '1.75rem' }}>{getCountryFlag(geo?.countryCode)}</span>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <MapPin size={15} color="var(--accent-cyan)" />
-              <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
-                {[geo?.city, geo?.region, geo?.country].filter(Boolean).join(', ') ||
-                  'Resolving location...'}
-              </span>
+        {isInitialLoading ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div
+                className="skeleton"
+                style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+              />
+              <div>
+                <div
+                  className="skeleton"
+                  style={{ width: '180px', height: '16px', marginBottom: '6px' }}
+                />
+                <div className="skeleton" style={{ width: '110px', height: '12px' }} />
+              </div>
             </div>
-            {geo?.timezone && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Timezone: {geo.timezone}
-              </span>
-            )}
-          </div>
-        </div>
 
-        {geo?.asOrganization && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-            <Wifi size={17} color="var(--accent-primary)" />
-            <div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-                Internet Service Provider
-              </span>
-              <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{geo.asOrganization}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+              <div
+                className="skeleton"
+                style={{ width: '22px', height: '22px', borderRadius: '4px' }}
+              />
+              <div>
+                <div
+                  className="skeleton"
+                  style={{ width: '100px', height: '12px', marginBottom: '4px' }}
+                />
+                <div className="skeleton" style={{ width: '140px', height: '16px' }} />
+              </div>
             </div>
-          </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontSize: '1.75rem' }}>{getCountryFlag(geo?.countryCode)}</span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <MapPin size={15} color="var(--accent-cyan)" />
+                  <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
+                    {[geo?.city, geo?.region, geo?.country].filter(Boolean).join(', ') ||
+                      'Resolving location...'}
+                  </span>
+                </div>
+                {geo?.timezone && (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Timezone: {geo.timezone}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {geo?.asOrganization && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                <Wifi size={17} color="var(--accent-primary)" />
+                <div>
+                  <span
+                    style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}
+                  >
+                    Internet Service Provider
+                  </span>
+                  <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                    {geo.asOrganization}
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

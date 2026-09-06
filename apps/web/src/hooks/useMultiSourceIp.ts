@@ -3,22 +3,29 @@ import type { IpProvider, ProviderResult } from '../types';
 
 export function useMultiSourceIp(providers: IpProvider[]) {
   const [results, setResults] = useState<Record<string, ProviderResult>>({});
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchAll = useCallback(async () => {
-    setIsRefreshing(true);
-
-    // Initialize all as loading
-    const initial: Record<string, ProviderResult> = {};
-    for (const p of providers) {
-      initial[p.id] = {
-        providerId: p.id,
-        providerName: p.name,
-        category: p.category,
-        status: 'loading',
-      };
-    }
-    setResults(initial);
+    // Determine if this is an initial load or background refresh
+    setResults((prev) => {
+      const isInitial = Object.keys(prev).length === 0;
+      if (isInitial) {
+        setIsInitialLoading(true);
+        const initial: Record<string, ProviderResult> = {};
+        for (const p of providers) {
+          initial[p.id] = {
+            providerId: p.id,
+            providerName: p.name,
+            category: p.category,
+            status: 'loading',
+          };
+        }
+        return initial;
+      }
+      setIsRefreshing(true);
+      return prev; // Keep existing data intact!
+    });
 
     // Query each provider concurrently
     await Promise.allSettled(
@@ -61,6 +68,7 @@ export function useMultiSourceIp(providers: IpProvider[]) {
     );
 
     setIsRefreshing(false);
+    setIsInitialLoading(false);
   }, [providers]);
 
   useEffect(() => {
@@ -87,6 +95,7 @@ export function useMultiSourceIp(providers: IpProvider[]) {
   return {
     results,
     resultsList,
+    isInitialLoading,
     isRefreshing,
     primaryIpv4,
     primaryIpv6,

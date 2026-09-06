@@ -5,9 +5,16 @@ import type { ProviderResult } from '../types';
 
 interface ComparisonMatrixProps {
   results: ProviderResult[];
+  isInitialLoading?: boolean;
 }
 
-export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) => {
+const SKELETON_ROW_KEYS = ['sk-row-1', 'sk-row-2', 'sk-row-3', 'sk-row-4'];
+const SKELETON_CARD_KEYS = ['sk-card-1', 'sk-card-2', 'sk-card-3'];
+
+export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
+  results,
+  isInitialLoading = false,
+}) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const copyIp = (ip: string, id: string) => {
@@ -66,13 +73,22 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <span className="badge badge-emerald">
-            {results.filter((r) => r.status === 'success').length} Responded
-          </span>
-          {results.some((r) => r.status === 'error') && (
-            <span className="badge badge-rose">
-              {results.filter((r) => r.status === 'error').length} Failed
-            </span>
+          {isInitialLoading ? (
+            <div
+              className="skeleton"
+              style={{ width: '95px', height: '22px', borderRadius: 'var(--radius-full)' }}
+            />
+          ) : (
+            <>
+              <span className="badge badge-emerald">
+                {results.filter((r) => r.status === 'success').length} Responded
+              </span>
+              {results.some((r) => r.status === 'error') && (
+                <span className="badge badge-rose">
+                  {results.filter((r) => r.status === 'error').length} Failed
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -99,41 +115,262 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
             </tr>
           </thead>
           <tbody>
-            {results.map((result) => {
+            {isInitialLoading
+              ? SKELETON_ROW_KEYS.map((rowKey) => (
+                  <tr key={rowKey} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                    <td style={{ padding: '1rem' }}>
+                      <div
+                        className="skeleton"
+                        style={{ width: '130px', height: '16px', marginBottom: '6px' }}
+                      />
+                      <div
+                        className="skeleton"
+                        style={{
+                          width: '80px',
+                          height: '12px',
+                          borderRadius: 'var(--radius-full)',
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div className="skeleton" style={{ width: '140px', height: '16px' }} />
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div
+                        className="skeleton"
+                        style={{
+                          width: '45px',
+                          height: '18px',
+                          borderRadius: 'var(--radius-full)',
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div className="skeleton" style={{ width: '60px', height: '16px' }} />
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div
+                        className="skeleton"
+                        style={{ width: '150px', height: '16px', marginBottom: '4px' }}
+                      />
+                      <div className="skeleton" style={{ width: '100px', height: '12px' }} />
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                      <div
+                        className="skeleton"
+                        style={{ width: '28px', height: '28px', borderRadius: 'var(--radius-sm)' }}
+                      />
+                    </td>
+                  </tr>
+                ))
+              : results.map((result) => {
+                  const isCopied = copiedId === result.providerId;
+
+                  return (
+                    <tr
+                      key={result.providerId}
+                      style={{
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                        transition: 'background var(--transition-fast)',
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)')
+                      }
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      {/* Provider Name & Category */}
+                      <td style={{ padding: '1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span
+                            style={{
+                              fontWeight: 600,
+                              fontSize: '0.9375rem',
+                              color: 'var(--text-primary)',
+                            }}
+                          >
+                            {result.providerName}
+                          </span>
+                          <div>{getCategoryBadge(result.category)}</div>
+                        </div>
+                      </td>
+
+                      {/* Detected IP */}
+                      <td style={{ padding: '1rem' }}>
+                        {result.status === 'loading' ? (
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                            Querying...
+                          </span>
+                        ) : result.status === 'error' ? (
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              color: '#fb7185',
+                              fontSize: '0.8125rem',
+                            }}
+                          >
+                            <WifiOff size={14} />
+                            <span>{result.errorMessage || 'Failed'}</span>
+                          </div>
+                        ) : (
+                          <span
+                            className="mono"
+                            style={{
+                              fontSize: '0.9375rem',
+                              fontWeight: 600,
+                              color: 'var(--text-primary)',
+                            }}
+                          >
+                            {result.ip}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* IP Version */}
+                      <td style={{ padding: '1rem' }}>
+                        {result.version ? (
+                          <span
+                            className={
+                              result.version === 'IPv6' ? 'badge badge-cyan' : 'badge badge-emerald'
+                            }
+                            style={{ fontSize: '0.6875rem' }}
+                          >
+                            {result.version}
+                          </span>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>-</span>
+                        )}
+                      </td>
+
+                      {/* Latency */}
+                      <td style={{ padding: '1rem' }}>
+                        {result.status === 'loading' ? (
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
+                            ...
+                          </span>
+                        ) : (
+                          getLatencyBadge(result.latencyMs)
+                        )}
+                      </td>
+
+                      {/* Organization & Location */}
+                      <td style={{ padding: '1rem' }}>
+                        {result.geo ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span
+                              style={{
+                                fontSize: '0.8125rem',
+                                fontWeight: 500,
+                                color: 'var(--text-primary)',
+                              }}
+                            >
+                              {[result.geo.city, result.geo.country].filter(Boolean).join(', ')}
+                            </span>
+                            {result.geo.asOrganization && (
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                {result.geo.asOrganization}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
+                            IP Only
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: '1rem', textAlign: 'right' }}>
+                        {result.ip && (
+                          <button
+                            className="btn btn-ghost btn-icon"
+                            onClick={() => copyIp(result.ip!, result.providerId)}
+                            title="Copy IP"
+                          >
+                            {isCopied ? <Check size={15} color="#34d399" /> : <Copy size={15} />}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card Stack View */}
+      <div className="comparison-cards-view">
+        {isInitialLoading
+          ? SKELETON_CARD_KEYS.map((cardKey) => (
+              <div key={cardKey} className="comparison-card-item">
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div className="skeleton" style={{ width: '120px', height: '18px' }} />
+                  <div
+                    className="skeleton"
+                    style={{ width: '90px', height: '18px', borderRadius: 'var(--radius-full)' }}
+                  />
+                </div>
+                <div
+                  className="skeleton"
+                  style={{ width: '100%', height: '42px', borderRadius: 'var(--radius-sm)' }}
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div className="skeleton" style={{ width: '60px', height: '14px' }} />
+                  <div className="skeleton" style={{ width: '110px', height: '14px' }} />
+                </div>
+              </div>
+            ))
+          : results.map((result) => {
               const isCopied = copiedId === result.providerId;
 
               return (
-                <tr
-                  key={result.providerId}
-                  style={{
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                    transition: 'background var(--transition-fast)',
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)')
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  {/* Provider Name & Category */}
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span
-                        style={{
-                          fontWeight: 600,
-                          fontSize: '0.9375rem',
-                          color: 'var(--text-primary)',
-                        }}
-                      >
-                        {result.providerName}
-                      </span>
-                      <div>{getCategoryBadge(result.category)}</div>
-                    </div>
-                  </td>
+                <div key={result.providerId} className="comparison-card-item">
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontWeight: 700,
+                        fontSize: '0.9375rem',
+                        color: 'var(--text-primary)',
+                      }}
+                    >
+                      {result.providerName}
+                    </span>
+                    {getCategoryBadge(result.category)}
+                  </div>
 
-                  {/* Detected IP */}
-                  <td style={{ padding: '1rem' }}>
+                  {/* Detected IP + Copy */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                    }}
+                  >
                     {result.status === 'loading' ? (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
                         Querying...
                       </span>
                     ) : result.status === 'error' ? (
@@ -150,202 +387,65 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
                         <span>{result.errorMessage || 'Failed'}</span>
                       </div>
                     ) : (
-                      <span
-                        className="mono"
-                        style={{
-                          fontSize: '0.9375rem',
-                          fontWeight: 600,
-                          color: 'var(--text-primary)',
-                        }}
-                      >
-                        {result.ip}
-                      </span>
-                    )}
-                  </td>
-
-                  {/* IP Version */}
-                  <td style={{ padding: '1rem' }}>
-                    {result.version ? (
-                      <span
-                        className={
-                          result.version === 'IPv6' ? 'badge badge-cyan' : 'badge badge-emerald'
-                        }
-                        style={{ fontSize: '0.6875rem' }}
-                      >
-                        {result.version}
-                      </span>
-                    ) : (
-                      <span style={{ color: 'var(--text-muted)' }}>-</span>
-                    )}
-                  </td>
-
-                  {/* Latency */}
-                  <td style={{ padding: '1rem' }}>
-                    {result.status === 'loading' ? (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>...</span>
-                    ) : (
-                      getLatencyBadge(result.latencyMs)
-                    )}
-                  </td>
-
-                  {/* Organization & Location */}
-                  <td style={{ padding: '1rem' }}>
-                    {result.geo ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span
+                          className="mono"
                           style={{
-                            fontSize: '0.8125rem',
-                            fontWeight: 500,
+                            fontSize: '0.9375rem',
+                            fontWeight: 600,
                             color: 'var(--text-primary)',
+                            wordBreak: 'break-all',
                           }}
                         >
-                          {[result.geo.city, result.geo.country].filter(Boolean).join(', ')}
+                          {result.ip}
                         </span>
-                        {result.geo.asOrganization && (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            {result.geo.asOrganization}
+                        {result.version && (
+                          <span
+                            className={
+                              result.version === 'IPv6' ? 'badge badge-cyan' : 'badge badge-emerald'
+                            }
+                            style={{ fontSize: '0.625rem', padding: '1px 5px' }}
+                          >
+                            {result.version}
                           </span>
                         )}
                       </div>
-                    ) : (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
-                        IP Only
-                      </span>
                     )}
-                  </td>
 
-                  {/* Actions */}
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
                     {result.ip && (
                       <button
                         className="btn btn-ghost btn-icon"
                         onClick={() => copyIp(result.ip!, result.providerId)}
                         title="Copy IP"
+                        style={{ flexShrink: 0 }}
                       >
-                        {isCopied ? <Check size={15} color="#34d399" /> : <Copy size={15} />}
+                        {isCopied ? <Check size={14} color="#34d399" /> : <Copy size={14} />}
                       </button>
                     )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  </div>
 
-      {/* Mobile Card Stack View */}
-      <div className="comparison-cards-view">
-        {results.map((result) => {
-          const isCopied = copiedId === result.providerId;
-
-          return (
-            <div key={result.providerId} className="comparison-card-item">
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: 700,
-                    fontSize: '0.9375rem',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  {result.providerName}
-                </span>
-                {getCategoryBadge(result.category)}
-              </div>
-
-              {/* Detected IP + Copy */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  padding: '8px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-subtle)',
-                }}
-              >
-                {result.status === 'loading' ? (
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
-                    Querying...
-                  </span>
-                ) : result.status === 'error' ? (
+                  {/* Latency & Location Footer */}
                   <div
                     style={{
                       display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      gap: '6px',
-                      color: '#fb7185',
-                      fontSize: '0.8125rem',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-muted)',
                     }}
                   >
-                    <WifiOff size={14} />
-                    <span>{result.errorMessage || 'Failed'}</span>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span
-                      className="mono"
-                      style={{
-                        fontSize: '0.9375rem',
-                        fontWeight: 600,
-                        color: 'var(--text-primary)',
-                        wordBreak: 'break-all',
-                      }}
-                    >
-                      {result.ip}
-                    </span>
-                    {result.version && (
-                      <span
-                        className={
-                          result.version === 'IPv6' ? 'badge badge-cyan' : 'badge badge-emerald'
-                        }
-                        style={{ fontSize: '0.625rem', padding: '1px 5px' }}
-                      >
-                        {result.version}
+                    <div>{getLatencyBadge(result.latencyMs)}</div>
+                    {result.geo ? (
+                      <span>
+                        {[result.geo.city, result.geo.country].filter(Boolean).join(', ')}
                       </span>
+                    ) : (
+                      <span>IP Only</span>
                     )}
                   </div>
-                )}
-
-                {result.ip && (
-                  <button
-                    className="btn btn-ghost btn-icon"
-                    onClick={() => copyIp(result.ip!, result.providerId)}
-                    title="Copy IP"
-                    style={{ flexShrink: 0 }}
-                  >
-                    {isCopied ? <Check size={14} color="#34d399" /> : <Copy size={14} />}
-                  </button>
-                )}
-              </div>
-
-              {/* Latency & Location Footer */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontSize: '0.75rem',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                <div>{getLatencyBadge(result.latencyMs)}</div>
-                {result.geo ? (
-                  <span>{[result.geo.city, result.geo.country].filter(Boolean).join(', ')}</span>
-                ) : (
-                  <span>IP Only</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
+                </div>
+              );
+            })}
       </div>
     </div>
   );

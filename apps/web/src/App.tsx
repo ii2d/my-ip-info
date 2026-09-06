@@ -56,8 +56,16 @@ export const App: React.FC = () => {
   }, [cloudConfig, customEndpoints]);
 
   // Query engine hooks
-  const { resultsList, isRefreshing, primaryIpv4, primaryIpv6, primaryGeo, avgLatency, refresh } =
-    useMultiSourceIp(activeProviders);
+  const {
+    resultsList,
+    isInitialLoading,
+    isRefreshing,
+    primaryIpv4,
+    primaryIpv6,
+    primaryGeo,
+    avgLatency,
+    refresh,
+  } = useMultiSourceIp(activeProviders);
 
   const leakResult = useWebRtcLeak();
 
@@ -98,10 +106,11 @@ export const App: React.FC = () => {
         geo={primaryGeo}
         avgLatency={avgLatency}
         isRefreshing={isRefreshing}
+        isInitialLoading={isInitialLoading}
       />
 
       {/* Multi-Source Comparison Table */}
-      <ComparisonMatrix results={resultsList} />
+      <ComparisonMatrix results={resultsList} isInitialLoading={isInitialLoading} />
 
       {/* Grid: Interactive World Map & WebRTC STUN Leak Inspector */}
       <div className="dashboard-grid">
