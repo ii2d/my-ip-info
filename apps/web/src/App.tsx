@@ -170,7 +170,7 @@ export const App: React.FC = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
           <a
-            href="https://github.com/donilan/my-ip-info"
+            href="https://github.com/ii2d/my-ip-info"
             target="_blank"
             rel="noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', textDecoration: 'none' }}

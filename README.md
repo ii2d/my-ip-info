@@ -2,10 +2,13 @@
 
 > An open-source, high-performance IP intelligence and network connectivity diagnostic suite powered by Cloudflare Workers and Cloudflare Pages.
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/donilan/my-ip-info)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ii2d/my-ip-info)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Most IP lookup tools query a single remote server. **my-ip-info** cross-validates IP data across your self-hosted **Cloudflare edge backend**, public APIs (`ipify`, `ip-api.com`, `icanhazip.com`), and browser **WebRTC STUN candidates** to detect VPN/proxy leaks, diagnose coordinate variations across geolocation databases, and measure real-time latency.
+
+- 🌐 **Live Web Dashboard**: [https://my-ip-info.ii2d.com](https://my-ip-info.ii2d.com)
+- ⚡ **Live Worker API**: [https://my-ip-info.padghjgfdf.workers.dev/api/v1/info](https://my-ip-info.padghjgfdf.workers.dev/api/v1/info)
 
 ---
 
@@ -15,13 +18,15 @@ Most IP lookup tools query a single remote server. **my-ip-info** cross-validate
 - 🗺️ **Geolocation Convergence Map**: Interactive dark Leaflet map plotting coordinates reported by each provider to visualize database discrepancies.
 - 🛡️ **WebRTC & STUN Leak Inspector**: Queries browser STUN ICE candidates to expose local network interfaces (LAN) and detect VPN/proxy bypasses.
 - ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to global Anycast edge nodes.
-- 💻 **CLI & cURL Friendly**: Direct terminal support:
+- 💻 **CLI & cURL Friendly**: Direct terminal support via versioned `/api/v1` routes:
   ```bash
-  curl https://your-worker.workers.dev/ip       # Plaintext IP
-  curl -4 https://your-worker.workers.dev/ip    # Force IPv4
-  curl -6 https://your-worker.workers.dev/ip    # Force IPv6
-  curl https://your-worker.workers.dev/json     # Full JSON
-  curl https://your-worker.workers.dev/geo      # Dedicated Geo info
+  curl https://your-worker.workers.dev/api/v1/ip              # Plaintext IP
+  curl -4 https://your-worker.workers.dev/api/v1/ip           # Force IPv4
+  curl -6 https://your-worker.workers.dev/api/v1/ip           # Force IPv6
+  curl https://your-worker.workers.dev/api/v1/info            # Terminal formatted diagnostic overview
+  curl -H "Accept: application/json" https://your-worker.workers.dev/api/v1/info  # Full JSON intelligence
+  curl https://your-worker.workers.dev/api/v1/geo             # Dedicated Geo info
+  curl https://your-worker.workers.dev/api/v1/yaml            # Dedicated YAML output
   ```
 - 🚀 **Automated Endpoint Sync**: Deploys backend services and automatically synchronizes assigned URLs into `apps/web/.env.local` without manual copy-pasting.
 
@@ -119,6 +124,20 @@ pnpm destroy:web   # Delete Cloudflare Pages Web Project
 # Non-interactive / CI teardown
 pnpm destroy -- --force
 ```
+
+---
+
+## 📡 API Reference
+
+All backend API routes are versioned under `/api/v1`:
+
+| Route | Method | Content-Type | Description |
+| :--- | :---: | :--- | :--- |
+| `/api/v1/info` | `GET` | `text/plain` or `application/json` | Smart content negotiation: returns plaintext for CLI tools (`curl`, `wget`, `httpie`) or JSON for browsers & apps |
+| `/api/v1/ip` | `GET` | `text/plain; charset=utf-8` | Returns the raw public client IP address with a trailing newline |
+| `/api/v1/geo` | `GET` | `application/json` | Geolocation data (city, region, country, lat/lon, ASN, datacenter colo) |
+| `/api/v1/yaml` | `GET` | `text/yaml; charset=utf-8` | Client metadata and network details formatted as clean YAML |
+| `/api/v1/health`| `GET` | `application/json` | Health check endpoint returning status and provider identifier |
 
 ---
 
