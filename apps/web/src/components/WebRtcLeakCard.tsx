@@ -16,7 +16,7 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
   const isVpnLeaked = Boolean(primaryIpv4 && stunWanIp && primaryIpv4 !== stunWanIp);
 
   return (
-    <div className="glass-card" style={{ padding: '1.75rem' }}>
+    <div className="glass-card" style={{ padding: 'clamp(1.1rem, 3vw, 1.75rem)' }}>
       <div
         style={{
           display: 'flex',
@@ -70,7 +70,7 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
             gap: '1.25rem',
           }}
         >

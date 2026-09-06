@@ -37,7 +37,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
   };
 
   return (
-    <div className="glass-card" style={{ padding: '2rem 2.25rem' }}>
+    <div className="glass-card hero-card">
       {/* Top row: Status indicators & Network stats */}
       <div
         style={{
@@ -84,9 +84,9 @@ export const HeroCard: React.FC<HeroCardProps> = ({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+          gap: '1.25rem',
+          marginBottom: '1.75rem',
         }}
       >
         {/* IPv4 Card */}
@@ -132,13 +132,10 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '1rem',
+              gap: '0.75rem',
             }}
           >
-            <span
-              className="mono"
-              style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}
-            >
+            <span className="mono hero-ip-v4">
               {ipv4 || (isRefreshing ? 'Checking...' : 'Not Detected')}
             </span>
 
@@ -197,17 +194,12 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '1rem',
+              gap: '0.75rem',
             }}
           >
             <span
-              className="mono"
-              style={{
-                fontSize: ipv6 ? '1.1rem' : '1.3rem',
-                fontWeight: 700,
-                color: ipv6 ? 'var(--text-primary)' : 'var(--text-muted)',
-                wordBreak: 'break-all',
-              }}
+              className="mono hero-ip-v6"
+              style={{ color: ipv6 ? 'var(--text-primary)' : 'var(--text-muted)' }}
             >
               {ipv6 || (isRefreshing ? 'Checking...' : 'No IPv6 Connectivity')}
             </span>

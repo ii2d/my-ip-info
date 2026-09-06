@@ -133,7 +133,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
   }, [geoPoints]);
 
   return (
-    <div className="glass-card" style={{ padding: '1.75rem' }}>
+    <div className="glass-card" style={{ padding: 'clamp(1.1rem, 3vw, 1.75rem)' }}>
       <div
         style={{
           display: 'flex',
@@ -163,16 +163,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
         )}
       </div>
 
-      <div
-        ref={mapContainerRef}
-        style={{
-          width: '100%',
-          height: '380px',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--border-subtle)',
-          overflow: 'hidden',
-        }}
-      />
+      <div ref={mapContainerRef} className="world-map-container" />
     </div>
   );
 };

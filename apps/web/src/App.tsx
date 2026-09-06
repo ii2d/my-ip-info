@@ -104,13 +104,7 @@ export const App: React.FC = () => {
       <ComparisonMatrix results={resultsList} />
 
       {/* Grid: Interactive World Map & WebRTC STUN Leak Inspector */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-          gap: '1.75rem',
-        }}
-      >
+      <div className="dashboard-grid">
         <WorldMap results={resultsList} />
         <WebRtcLeakCard leakResult={leakResult} primaryIpv4={primaryIpv4} />
       </div>

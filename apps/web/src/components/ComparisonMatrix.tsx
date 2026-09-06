@@ -47,7 +47,7 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
   };
 
   return (
-    <div className="glass-card" style={{ padding: '1.75rem' }}>
+    <div className="glass-card" style={{ padding: 'clamp(1.1rem, 3vw, 1.75rem)' }}>
       <div
         style={{
           display: 'flex',
@@ -77,7 +77,8 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
         </div>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
+      {/* Desktop Table View */}
+      <div className="comparison-table-view">
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr
@@ -230,6 +231,121 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card Stack View */}
+      <div className="comparison-cards-view">
+        {results.map((result) => {
+          const isCopied = copiedId === result.providerId;
+
+          return (
+            <div key={result.providerId} className="comparison-card-item">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 700,
+                    fontSize: '0.9375rem',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  {result.providerName}
+                </span>
+                {getCategoryBadge(result.category)}
+              </div>
+
+              {/* Detected IP + Copy */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                {result.status === 'loading' ? (
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
+                    Querying...
+                  </span>
+                ) : result.status === 'error' ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      color: '#fb7185',
+                      fontSize: '0.8125rem',
+                    }}
+                  >
+                    <WifiOff size={14} />
+                    <span>{result.errorMessage || 'Failed'}</span>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      className="mono"
+                      style={{
+                        fontSize: '0.9375rem',
+                        fontWeight: 600,
+                        color: 'var(--text-primary)',
+                        wordBreak: 'break-all',
+                      }}
+                    >
+                      {result.ip}
+                    </span>
+                    {result.version && (
+                      <span
+                        className={
+                          result.version === 'IPv6' ? 'badge badge-cyan' : 'badge badge-emerald'
+                        }
+                        style={{ fontSize: '0.625rem', padding: '1px 5px' }}
+                      >
+                        {result.version}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {result.ip && (
+                  <button
+                    className="btn btn-ghost btn-icon"
+                    onClick={() => copyIp(result.ip!, result.providerId)}
+                    title="Copy IP"
+                    style={{ flexShrink: 0 }}
+                  >
+                    {isCopied ? <Check size={14} color="#34d399" /> : <Copy size={14} />}
+                  </button>
+                )}
+              </div>
+
+              {/* Latency & Location Footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '0.75rem',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <div>{getLatencyBadge(result.latencyMs)}</div>
+                {result.geo ? (
+                  <span>{[result.geo.city, result.geo.country].filter(Boolean).join(', ')}</span>
+                ) : (
+                  <span>IP Only</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

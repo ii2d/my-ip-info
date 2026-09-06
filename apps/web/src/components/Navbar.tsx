@@ -1,4 +1,4 @@
-import { Activity, Globe, RefreshCw, Server, Settings, Terminal } from 'lucide-react';
+import { Globe, RefreshCw, Server, Settings, Terminal } from 'lucide-react';
 import type React from 'react';
 
 interface NavbarProps {
@@ -29,7 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="brand-title">my-ip-info</span>
             <span className="brand-badge">Open Source</span>
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <p className="nav-subtitle" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             Multi-Source IP & Connectivity Intelligence
           </p>
         </div>
@@ -38,7 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="nav-actions">
         <button className="btn btn-ghost" onClick={onOpenCliModal} title="CLI / cURL commands">
           <Terminal size={16} />
-          <span>cURL / CLI</span>
+          <span className="nav-btn-text">cURL / CLI</span>
         </button>
 
         <button
@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           title="Add or manage custom endpoints"
         >
           <Server size={16} />
-          <span>Custom APIs</span>
+          <span className="nav-btn-text">Custom APIs</span>
           {activeEndpointsCount > 0 && (
             <span
               className="badge badge-cyan"
@@ -68,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <button className="btn btn-primary" onClick={onRefresh} disabled={isRefreshing}>
           <RefreshCw size={15} className={isRefreshing ? 'spin-anim' : ''} />
-          <span>{isRefreshing ? 'Checking...' : 'Refresh'}</span>
+          <span className="nav-btn-text">{isRefreshing ? 'Checking...' : 'Refresh'}</span>
         </button>
       </div>
 
