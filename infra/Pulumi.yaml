@@ -1,3 +1,0 @@
-name: my-ip-info-infra
-runtime: nodejs
-description: Cloudflare DNS and Pages Custom Domain IaC

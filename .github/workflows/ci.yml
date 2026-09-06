@@ -36,14 +36,14 @@ jobs:
       - name: Lint & Format Check (Biome)
         run: pnpm lint
 
-      - name: Build Core Package
-        run: pnpm --filter @my-ip/core build
-
-      - name: Typecheck Workspaces (TypeScript)
+      - name: Typecheck Codebase (TypeScript)
         run: pnpm typecheck
 
       - name: Run Unit Tests
         run: pnpm test
+
+      - name: Build Frontend & Worker Assets
+        run: pnpm build
 
   security:
     name: Vulnerability & Secret Audit

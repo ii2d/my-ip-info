@@ -1,42 +1,48 @@
 {
-  "name": "my-ip-info-monorepo",
+  "name": "my-ip-info",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "license": "MIT",
   "description": "Open-source multi-source IP intelligence and connectivity diagnostic suite",
   "repository": {
     "type": "git",
     "url": "https://github.com/ii2d/my-ip-info.git"
   },
-  "homepage": "https://my-ip-info.ii2d.com",
-  "bugs": {
-    "url": "https://github.com/ii2d/my-ip-info/issues"
-  },
   "scripts": {
-    "dev": "pnpm --filter @my-ip/web dev",
-    "dev:api": "pnpm --filter @my-ip/server-cloudflare dev",
-    "dev:node": "pnpm --filter @my-ip/server-node dev",
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
-    "deploy": "node scripts/deploy.mjs",
-    "deploy:api": "node scripts/deploy.mjs --api",
-    "deploy:web": "node scripts/deploy.mjs --web",
-    "destroy": "node scripts/destroy.mjs",
-    "destroy:api": "node scripts/destroy.mjs --api",
-    "destroy:web": "node scripts/destroy.mjs --web",
-    "infra:preview": "pnpm --filter @my-ip/infra preview",
-    "infra:up": "pnpm --filter @my-ip/infra up",
-    "infra:destroy": "pnpm --filter @my-ip/infra destroy",
+    "dev": "vite",
+    "dev:worker": "wrangler dev",
+    "dev:node": "tsx src/server/node.ts",
+    "build": "vite build",
+    "deploy": "pnpm build && wrangler deploy",
+    "test": "tsx --test test/core.test.ts",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "typecheck": "pnpm --filter @my-ip/core build && pnpm -r typecheck",
     "audit": "pnpm audit --registry=https://registry.npmjs.org/ --audit-level=high"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "hono": "^4.7.4",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.16.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.12",
-    "typescript": "^5.8.2"
+    "@cloudflare/workers-types": "^5.20260903.1",
+    "@types/leaflet": "^1.9.16",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0",
+    "wrangler": "^4.129.0"
   },
   "packageManager": "pnpm@12.3.4"
 }
