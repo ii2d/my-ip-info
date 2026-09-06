@@ -1,14 +1,17 @@
 packages:
   - 'packages/*'
   - 'apps/*'
+  - 'infra'
 
 allowBuilds:
   esbuild: true
+  protobufjs: true
   sharp: true
   workerd: true
 
 onlyBuiltDependencies:
   - 'esbuild'
+  - 'protobufjs'
   - 'sharp'
   - 'workerd'
 

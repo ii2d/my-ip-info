@@ -16,10 +16,12 @@ out/
 .env.*.local
 *.pem
 
-# Pulumi stacks (keep example only)
+# Pulumi stacks and local state
 infra/Pulumi.*.yaml
 !infra/Pulumi.example.yaml
 !infra/Pulumi.yaml
+.pulumi/
+**/.pulumi/
 
 # Logs
 *.log

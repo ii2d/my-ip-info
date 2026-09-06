@@ -22,7 +22,10 @@
     "deploy:web": "node scripts/deploy.mjs --web",
     "destroy": "node scripts/destroy.mjs",
     "destroy:api": "node scripts/destroy.mjs --api",
-    "destroy:web": "node scripts/destroy.mjs --web"
+    "destroy:web": "node scripts/destroy.mjs --web",
+    "infra:preview": "pnpm --filter @my-ip/infra preview",
+    "infra:up": "pnpm --filter @my-ip/infra up",
+    "infra:destroy": "pnpm --filter @my-ip/infra destroy"
   },
   "devDependencies": {
     "typescript": "^5.8.2"
