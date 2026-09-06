@@ -5,23 +5,19 @@
   "description": "Open-source multi-source IP intelligence and connectivity diagnostic suite",
   "scripts": {
     "dev": "pnpm --filter @my-ip/web dev",
+    "dev:api": "pnpm --filter @my-ip/server-cloudflare dev",
+    "dev:node": "pnpm --filter @my-ip/server-node dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "deploy:cloudflare": "pnpm --filter @my-ip/server-cloudflare deploy",
-    "deploy:firebase": "pnpm --filter @my-ip/server-firebase deploy",
-    "deploy:lambda": "node scripts/deploy-and-sync.mjs --lambda-only",
-    "deploy:web": "node scripts/deploy-web.mjs",
-    "deploy:all": "node scripts/deploy-and-sync.mjs",
-    "destroy:cloudflare": "node scripts/destroy-and-sync.mjs --cloudflare-only",
-    "destroy:firebase": "node scripts/destroy-and-sync.mjs --firebase-only",
-    "destroy:lambda": "node scripts/destroy-and-sync.mjs --lambda-only",
-    "destroy:web": "node scripts/destroy-and-sync.mjs --web-only",
-    "destroy:all": "node scripts/destroy-and-sync.mjs",
-    "destroy": "node scripts/destroy-and-sync.mjs",
-    "sync:endpoints": "node scripts/deploy-and-sync.mjs --sync-only"
+    "deploy": "node scripts/deploy.mjs",
+    "deploy:api": "node scripts/deploy.mjs --api",
+    "deploy:web": "node scripts/deploy.mjs --web",
+    "destroy": "node scripts/destroy.mjs",
+    "destroy:api": "node scripts/destroy.mjs --api",
+    "destroy:web": "node scripts/destroy.mjs --web"
   },
   "devDependencies": {
     "typescript": "^5.8.2"
   },
-  "packageManager": "pnpm@11.8.0"
+  "packageManager": "pnpm@12.3.4"
 }

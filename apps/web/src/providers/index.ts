@@ -84,66 +84,18 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
  */
 export function getSelfHostedProviders(config: {
   cloudflareUrl?: string;
-  firebaseUrl?: string;
-  lambdaUrl?: string;
 }): IpProvider[] {
   const providers: IpProvider[] = [];
 
   if (config.cloudflareUrl) {
     providers.push({
       id: 'self-cloudflare',
-      name: 'Cloudflare Worker (Self-Hosted)',
+      name: 'Cloudflare Worker (Edge)',
       category: 'self-hosted',
       endpointUrl: config.cloudflareUrl,
-      description: 'Edge Worker with native CF Geo headers',
+      description: 'Edge Worker with native CF Geo, ASN & TLS headers',
       fetchIp: async () => {
         const url = new URL('/json', config.cloudflareUrl).toString();
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        return {
-          ip: data.ip,
-          version: data.version,
-          geo: data.geo,
-          protocol: data.headers?.protocol,
-          rawHeaders: data.headers,
-        };
-      },
-    });
-  }
-
-  if (config.firebaseUrl) {
-    providers.push({
-      id: 'self-firebase',
-      name: 'Firebase Function (Self-Hosted)',
-      category: 'self-hosted',
-      endpointUrl: config.firebaseUrl,
-      description: 'Google Cloud Functions v2 runtime',
-      fetchIp: async () => {
-        const url = new URL('/json', config.firebaseUrl).toString();
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        return {
-          ip: data.ip,
-          version: data.version,
-          geo: data.geo,
-          protocol: data.headers?.protocol,
-          rawHeaders: data.headers,
-        };
-      },
-    });
-  }
-
-  if (config.lambdaUrl) {
-    providers.push({
-      id: 'self-lambda',
-      name: 'AWS Lambda (Self-Hosted)',
-      category: 'self-hosted',
-      endpointUrl: config.lambdaUrl,
-      description: 'AWS Lambda Function URL / API Gateway',
-      fetchIp: async () => {
-        const url = new URL('/json', config.lambdaUrl).toString();
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();

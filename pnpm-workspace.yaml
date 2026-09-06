@@ -3,15 +3,13 @@ packages:
   - 'apps/*'
 
 allowBuilds:
-  '@firebase/util': true
+  '@firebase/util': set this to true or false
   esbuild: true
-  protobufjs: true
+  protobufjs: set this to true or false
   sharp: true
   workerd: true
 
 onlyBuiltDependencies:
-  - '@firebase/util'
   - 'esbuild'
-  - 'protobufjs'
   - 'sharp'
   - 'workerd'

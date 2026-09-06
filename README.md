@@ -1,31 +1,29 @@
 # 🌐 my-ip-info
 
-> An open-source, multi-source IP intelligence and network connectivity diagnostic suite.
+> An open-source, high-performance IP intelligence and network connectivity diagnostic suite powered by Cloudflare Workers and Cloudflare Pages.
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/donilan/my-ip-info)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Most IP tools check a single server. **my-ip-info** queries **multiple cloud backends, public APIs, and browser STUN candidates concurrently** to cross-validate IP addresses, detect VPN / proxy routing leaks, identify coordinate discrepancies across geolocation databases, and measure multi-cloud latency.
+Most IP lookup tools query a single remote server. **my-ip-info** cross-validates IP data across your self-hosted **Cloudflare edge backend**, public APIs (`ipify`, `ip-api.com`, `icanhazip.com`), and browser **WebRTC STUN candidates** to detect VPN/proxy leaks, diagnose coordinate variations across geolocation databases, and measure real-time latency.
 
 ---
 
 ## ✨ Features
 
-- ⚡ **Multi-Source Cross-Validation**: Compares results simultaneously across:
-  - Self-hosted Cloudflare Workers, Firebase Functions, and AWS Lambda
-  - Public APIs (`ipify` v4/v6, `ip-api.com`, `icanhazip.com`, etc.)
-  - Custom user-defined API endpoints
+- ⚡ **Zero-Latency Edge Intelligence**: Powered by Cloudflare Workers. Automatically extracts city, region, coordinates, ASN (`AS6327`), ISP organization, and airport datacenter code (`colo`) directly from the edge TLS connection with no external database required.
 - 🗺️ **Geolocation Convergence Map**: Interactive dark Leaflet map plotting coordinates reported by each provider to visualize database discrepancies.
 - 🛡️ **WebRTC & STUN Leak Inspector**: Queries browser STUN ICE candidates to expose local network interfaces (LAN) and detect VPN/proxy bypasses.
-- ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to edge Anycast vs regional cloud functions.
+- ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to global Anycast edge nodes.
 - 💻 **CLI & cURL Friendly**: Direct terminal support:
   ```bash
-  curl https://your-domain.com/ip       # Plaintext IP
-  curl -4 https://your-domain.com/ip    # Force IPv4
-  curl -6 https://your-domain.com/ip    # Force IPv6
-  curl https://your-domain.com/json     # Full JSON
+  curl https://your-worker.workers.dev/ip       # Plaintext IP
+  curl -4 https://your-worker.workers.dev/ip    # Force IPv4
+  curl -6 https://your-worker.workers.dev/ip    # Force IPv6
+  curl https://your-worker.workers.dev/json     # Full JSON
+  curl https://your-worker.workers.dev/geo      # Dedicated Geo info
   ```
-- 🚀 **Automated Endpoint Sync**: Deploys serverless backends and automatically updates frontend environment variables with zero manual copy-pasting.
+- 🚀 **Automated Endpoint Sync**: Deploys backend services and automatically synchronizes assigned URLs into `apps/web/.env.local` without manual copy-pasting.
 
 ---
 
@@ -34,15 +32,14 @@ Most IP tools check a single server. **my-ip-info** queries **multiple cloud bac
 ```text
 my-ip-info/
 ├── apps/
-│   ├── web/                    # Modern Vite + React frontend dashboard
-│   ├── server-cloudflare/      # Cloudflare Worker deployment
-│   ├── server-firebase/        # Firebase Functions v2 HTTP deployment
-│   ├── server-lambda/          # AWS Lambda handler
+│   ├── web/                    # Vite + React frontend dashboard
+│   ├── server-cloudflare/      # Cloudflare Worker edge backend
 │   └── server-node/            # Standalone Node/Bun/Docker server
 ├── packages/
 │   └── core/                   # Shared types, IP parser, Bogon detector & Hono app
 └── scripts/
-    └── deploy-and-sync.mjs     # Multi-cloud deployer & endpoint sync utility
+    ├── deploy.mjs              # Unified Cloudflare Worker & Pages deployer with auto-sync
+    └── destroy.mjs             # Safe teardown utility for Worker & Pages
 ```
 
 ---
@@ -58,112 +55,69 @@ pnpm install
 ### 2. Run Locally
 
 ```bash
-# Start frontend dashboard
+# Start the web dashboard (http://localhost:5173)
 pnpm dev
 
 # In another terminal, run standalone Node backend (optional)
 pnpm --filter @my-ip/server-node dev
 ```
 
-Visit `http://localhost:5173` in your browser.
-
 ---
 
 ## ☁️ Deployment Guide
 
-### Provider Comparison
-
-| Provider | Geolocation & ASN | Latency | Free Tier Policy | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **Cloudflare Workers** (⭐ **Recommended**) | **Built-in** (City, Region, Lat/Lon, ASN, ISP, Colo) | **< 15ms** (Global Anycast) | 100k req/day free (No credit card required) | ✅ **Fully Tested & Verified** |
-| **AWS Lambda** | IP & Headers only (Requires external DB for Geo) | ~50–200ms (Regional + cold start) | 1M req/mo free (AWS account required) | ✅ **Fully Tested & Verified** |
-| **Firebase Functions v2** | IP & Headers only | ~200–800ms | Requires **Blaze (Pay-as-you-go)** plan | ⚠️ **Not Yet Tested** |
-
----
-
-### ⭐ Option 1: Cloudflare Workers (Recommended)
-
-> [!TIP]
-> **Why Cloudflare Workers is the recommended backend:**
-> 1. **Zero-Latency GeoIP & ASN**: Cloudflare's edge proxy automatically enriches `request.cf` with accurate coordinates, city, region, ASN (`AS6327`), ISP organization, and airport datacenter code (`colo: "YVR"`). No external GeoIP database or paid API keys needed!
-> 2. **Edge Performance**: Routed instantly to the nearest physical city across 300+ global edge locations without cold start delays.
-> 3. **No Credit Card Required**: Generous free tier (100,000 requests/day).
-
-Click the button below to deploy directly via your browser:
-
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/donilan/my-ip-info)
-
-Or deploy via terminal:
-```bash
-pnpm deploy:cloudflare
-```
-
----
-
-### Option 2: AWS Lambda (Function URLs)
-
-Deploy as a standalone AWS Lambda function with a public, CORS-enabled Lambda Function URL:
+Copy `.env.example` to `.env` to configure optional account IDs or custom domains:
 
 ```bash
-pnpm deploy:lambda
+cp .env.example .env
 ```
-*Requires AWS CLI configured with credentials (`AWS_PROFILE` in `.env`).*
 
----
+### 1. One-Command Full Stack Deployment
 
-### Option 3: Firebase Functions v2
-
-> [!WARNING]
-> **Maintainer Notice:** Firebase deployment has **not been tested yet**. 
-> Note that Google Cloud requires the project to be upgraded to the **Blaze (pay-as-you-go) plan** to enable the required Cloud Build and Artifact Registry APIs. It cannot be deployed on the free Spark plan. Community testing, verification, and PRs are welcome!
+Deploy the Worker API, automatically synchronize its live URL to the web dashboard, and deploy the React frontend to Cloudflare Pages:
 
 ```bash
-pnpm deploy:firebase
+pnpm deploy
 ```
 
----
-
-### Option 4: Automated Multi-Cloud Deploy & Frontend Sync
-
-Run our built-in deployment script to deploy all configured targets and automatically write the assigned live URLs into `apps/web/.env.local`:
+### 2. Individual Deployments
 
 ```bash
-pnpm deploy:all
+pnpm deploy:api    # Deploy Cloudflare Worker API & sync live URL to web
+pnpm deploy:web    # Build & deploy React dashboard to Cloudflare Pages
 ```
 
----
+### 3. Custom Domain Configuration (Code-as-Config)
 
-### Option 5: Deploy Web UI to Cloudflare Pages
+To bind your own domain without touching git-tracked files or using Terraform/Pulumi:
 
-Deploy the React + Vite frontend dashboard to Cloudflare Pages:
+In your local `.env` (git-ignored):
+```ini
+# Custom domain for the Web Dashboard (e.g. ip.yourdomain.com)
+CLOUDFLARE_PAGES_DOMAIN=ip.yourdomain.com
 
-```bash
-pnpm deploy:web
+# Optional: Custom domain for the Worker API (e.g. api.yourdomain.com)
+# CLOUDFLARE_WORKER_DOMAIN=api.yourdomain.com
 ```
 
-To bind a custom domain like `ip.yourdomain.com`:
-1. In Cloudflare Dashboard, go to **Workers & Pages** -> **my-ip-info**.
-2. Navigate to **Custom domains** tab -> **Set up a domain**.
-3. Enter `ip.yourdomain.com` and click **Activate domain**. Cloudflare automatically adds the DNS CNAME record and provisions SSL.
+When you run `pnpm deploy` (or `pnpm deploy:web`), the script automatically registers the domain and provisions universal SSL certificates.
 
 ---
 
 ## 🗑️ Teardown & Destruction Guide
 
-Tear down deployed serverless services and automatically clean up `apps/web/.env.local`:
+Cleanly delete deployed Cloudflare services and reset your local frontend endpoints:
 
 ```bash
-# Destroy all deployed services (interactive confirmation prompt)
-pnpm destroy:all
+# Interactively select and destroy all deployed Cloudflare services
+pnpm destroy
 
-# Or destroy specific providers
-pnpm destroy:cloudflare
-pnpm destroy:lambda
-pnpm destroy:firebase
-pnpm destroy:web
+# Or destroy specific services
+pnpm destroy:api   # Delete Cloudflare Worker API
+pnpm destroy:web   # Delete Cloudflare Pages Web Project
 
 # Non-interactive / CI teardown
-pnpm destroy:all -- --force
+pnpm destroy -- --force
 ```
 
 ---

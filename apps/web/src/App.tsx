@@ -36,8 +36,6 @@ export const App: React.FC = () => {
   const [cloudConfig, setCloudConfig] = useState(() => {
     const defaults = {
       cloudflareUrl: import.meta.env.VITE_CLOUDFLARE_URL || '',
-      firebaseUrl: import.meta.env.VITE_FIREBASE_URL || '',
-      lambdaUrl: import.meta.env.VITE_LAMBDA_URL || '',
     };
     if (typeof window === 'undefined') return defaults;
     try {
@@ -167,7 +165,7 @@ export const App: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span>Open Source Project</span>
           <span>•</span>
-          <span>Deployable to Cloudflare Workers, Firebase, and AWS Lambda</span>
+          <span>Powered by Cloudflare Workers & Cloudflare Pages</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
