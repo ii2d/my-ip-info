@@ -2,6 +2,7 @@
   "name": "my-ip-info-monorepo",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "description": "Open-source multi-source IP intelligence and connectivity diagnostic suite",
   "repository": {
     "type": "git",
