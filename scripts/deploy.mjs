@@ -58,8 +58,8 @@ const loadedFiles = loadEnv();
 function runCmd(cmd, options = {}) {
   return execSync(cmd, {
     encoding: 'utf8',
-    env: process.env,
     ...options,
+    env: { ...process.env, ...(options.env || {}) },
   });
 }
 
@@ -101,20 +101,29 @@ async function main() {
   // ===========================================================================
   // Step 1: Deploy API (Cloudflare Worker)
   // ===========================================================================
+  const workerAccountId = process.env.CLOUDFLARE_WORKER_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+  const pagesAccountId = process.env.CLOUDFLARE_PAGES_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+
+  // ===========================================================================
+  // Step 1: Deploy API (Cloudflare Worker)
+  // ===========================================================================
   if (deployAll || isApiOnly) {
     console.log('\n📦 Deploying Cloudflare Worker API (apps/server-cloudflare)...');
 
-    if (!process.env.CLOUDFLARE_ACCOUNT_ID) {
-      console.log('   ℹ️  CLOUDFLARE_ACCOUNT_ID is not set in .env.');
+    if (!workerAccountId) {
+      console.log('   ℹ️  No Cloudflare Account ID specified in .env (CLOUDFLARE_WORKER_ACCOUNT_ID or CLOUDFLARE_ACCOUNT_ID).');
       console.log('      Run `npx wrangler whoami` to find and set your account ID.\n');
+    } else {
+      console.log(`   Target Account ID: ${workerAccountId}`);
     }
 
     try {
       const workerName = process.env.CLOUDFLARE_WORKER_NAME || 'my-ip-info';
       const domainFlag = process.env.CLOUDFLARE_WORKER_DOMAIN ? ` --domain ${process.env.CLOUDFLARE_WORKER_DOMAIN}` : '';
+      const workerEnv = workerAccountId ? { CLOUDFLARE_ACCOUNT_ID: workerAccountId } : {};
 
       console.log(`   Deploying Worker: '${workerName}'${process.env.CLOUDFLARE_WORKER_DOMAIN ? ` (Domain: ${process.env.CLOUDFLARE_WORKER_DOMAIN})` : ''}...`);
-      const output = runCmd(`npx wrangler deploy --name ${workerName}${domainFlag}`, { cwd: cfDir });
+      const output = runCmd(`npx wrangler deploy --name ${workerName}${domainFlag}`, { cwd: cfDir, env: workerEnv });
       console.log(output);
 
       if (process.env.CLOUDFLARE_WORKER_DOMAIN) {
@@ -152,7 +161,11 @@ async function main() {
     console.log('\n🌐 Deploying Web Dashboard to Cloudflare Pages (apps/web)...');
     const projectName = process.env.CLOUDFLARE_PAGES_PROJECT_NAME || 'my-ip-info';
     const customDomain = process.env.CLOUDFLARE_PAGES_DOMAIN;
-    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+    const pagesEnv = pagesAccountId ? { CLOUDFLARE_ACCOUNT_ID: pagesAccountId } : {};
+
+    if (pagesAccountId) {
+      console.log(`   Target Account ID: ${pagesAccountId}`);
+    }
 
     // 1. Build Vite frontend
     console.log('   Building Web UI bundle (Vite)...');
@@ -160,7 +173,7 @@ async function main() {
 
     // 2. Ensure Pages project exists
     try {
-      runCmd(`npx wrangler pages project create ${projectName} --production-branch main`, { stdio: 'pipe' });
+      runCmd(`npx wrangler pages project create ${projectName} --production-branch main`, { stdio: 'pipe', env: pagesEnv });
       console.log(`   ✨ Created Pages project: '${projectName}'`);
     } catch {
       // Already exists
@@ -170,7 +183,7 @@ async function main() {
     console.log(`   Uploading assets to '${projectName}'...`);
     const output = runCmd(
       `npx wrangler pages deploy apps/web/dist --project-name ${projectName} --branch main --commit-dirty=true`,
-      { cwd: rootDir }
+      { cwd: rootDir, env: pagesEnv }
     );
     console.log(output);
 
@@ -178,10 +191,10 @@ async function main() {
     if (customDomain) {
       console.log(`   🔗 Checking custom domain: ${customDomain}...`);
       const token = getCloudflareToken();
-      if (token && accountId) {
+      if (token && pagesAccountId) {
         try {
           const res = await fetch(
-            `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/domains`,
+            `https://api.cloudflare.com/client/v4/accounts/${pagesAccountId}/pages/projects/${projectName}/domains`,
             {
               method: 'POST',
               headers: {

@@ -95,8 +95,11 @@ export function getSelfHostedProviders(config: {
       endpointUrl: config.cloudflareUrl,
       description: 'Edge Worker with native CF Geo, ASN & TLS headers',
       fetchIp: async () => {
-        const url = new URL('/json', config.cloudflareUrl).toString();
-        const res = await fetch(url, { cache: 'no-store' });
+        const url = new URL('/api/v1/info', config.cloudflareUrl).toString();
+        const res = await fetch(url, {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         return {
@@ -126,19 +129,25 @@ export function getCustomEndpointProviders(customEndpoints: CustomEndpoint[]): I
       endpointUrl: ep.url,
       description: ep.url,
       fetchIp: async () => {
-        // Try /json first, fallback to raw endpoint
+        // Try /api/v1/info first, fallback to raw endpoint
         let targetUrl = ep.url;
-        if (!targetUrl.endsWith('/json') && !targetUrl.endsWith('/ip')) {
+        if (!targetUrl.includes('/info') && !targetUrl.includes('/ip')) {
           try {
             const urlObj = new URL(targetUrl);
-            urlObj.pathname = urlObj.pathname.replace(/\/+$/, '') + '/json';
+            const basePath = urlObj.pathname.replace(/\/+$/, '');
+            urlObj.pathname = basePath.endsWith('/api/v1')
+              ? `${basePath}/info`
+              : `${basePath}/api/v1/info`.replace(/\/+/g, '/');
             targetUrl = urlObj.toString();
           } catch {
             // keep targetUrl as is
           }
         }
 
-        const res = await fetch(targetUrl, { cache: 'no-store' });
+        const res = await fetch(targetUrl, {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const contentType = res.headers.get('content-type') || '';

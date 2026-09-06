@@ -135,7 +135,7 @@ export const CustomEndpointModal: React.FC<CustomEndpointModalProps> = ({
               <input
                 className="form-input"
                 type="url"
-                placeholder="https://my-ip.example.com/json"
+                placeholder="https://my-ip.example.com/api/v1/info"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />

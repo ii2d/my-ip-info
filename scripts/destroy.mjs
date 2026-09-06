@@ -51,8 +51,8 @@ loadEnv();
 function runCmd(cmd, options = {}) {
   return execSync(cmd, {
     encoding: 'utf8',
-    env: process.env,
     ...options,
+    env: { ...process.env, ...(options.env || {}) },
   });
 }
 
@@ -89,14 +89,18 @@ async function main() {
     process.exit(0);
   }
 
+  const workerAccountId = process.env.CLOUDFLARE_WORKER_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+  const pagesAccountId = process.env.CLOUDFLARE_PAGES_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+
   // 1. Destroy Cloudflare Worker
   if (destroyAll || isApiOnly) {
     console.log('\n🧹 Destroying Cloudflare Worker API...');
     const cfDir = path.resolve(rootDir, 'apps', 'server-cloudflare');
     try {
       const workerName = process.env.CLOUDFLARE_WORKER_NAME || 'my-ip-info';
-      console.log(`   Deleting Worker '${workerName}'...`);
-      const output = runCmd(`npx wrangler delete ${workerName} --force`, { cwd: cfDir });
+      console.log(`   Deleting Worker '${workerName}'${workerAccountId ? ` (Account ID: ${workerAccountId})` : ''}...`);
+      const workerEnv = workerAccountId ? { CLOUDFLARE_ACCOUNT_ID: workerAccountId } : {};
+      const output = runCmd(`npx wrangler delete ${workerName} --force`, { cwd: cfDir, env: workerEnv });
       console.log(output);
       console.log(`✅ Cloudflare Worker '${workerName}' removed.`);
     } catch (err) {
@@ -110,8 +114,9 @@ async function main() {
     console.log('\n🧹 Destroying Cloudflare Pages Web Project...');
     const projectName = process.env.CLOUDFLARE_PAGES_PROJECT_NAME || 'my-ip-info';
     try {
-      console.log(`   Deleting Pages project '${projectName}'...`);
-      const output = runCmd(`npx wrangler pages project delete ${projectName} --yes`, { cwd: rootDir });
+      console.log(`   Deleting Pages project '${projectName}'${pagesAccountId ? ` (Account ID: ${pagesAccountId})` : ''}...`);
+      const pagesEnv = pagesAccountId ? { CLOUDFLARE_ACCOUNT_ID: pagesAccountId } : {};
+      const output = runCmd(`npx wrangler pages project delete ${projectName} --yes`, { cwd: rootDir, env: pagesEnv });
       console.log(output);
       console.log(`✅ Cloudflare Pages project '${projectName}' deleted.`);
     } catch (err) {

@@ -47,7 +47,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <div className="modal-body">
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Configure your self-hosted Cloudflare Worker URL. This can also be populated automatically via <code className="mono">pnpm deploy:all</code> into <code className="mono">apps/web/.env.local</code>.
+            Configure your self-hosted Cloudflare Worker URL. This can also be populated automatically via <code className="mono">pnpm deploy</code> into <code className="mono">apps/web/.env.local</code>.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

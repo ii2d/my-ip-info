@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { getIpVersion, isBogonIp } from './ip';
 import { extractClientIp, extractCloudflareGeo } from './extractors';
@@ -55,8 +55,14 @@ export function createIpApp(options: CreateAppOptions = {}) {
     };
   };
 
+  const getCf = (c: Context): CloudflareCfData | undefined => {
+    return (c.req.raw as unknown as { cf?: CloudflareCfData })?.cf;
+  };
+
+  const v1 = new Hono();
+
   // Health check
-  app.get('/health', (c) => {
+  v1.get('/health', (c: Context) => {
     return c.json({
       status: 'ok',
       provider: providerName,
@@ -65,29 +71,16 @@ export function createIpApp(options: CreateAppOptions = {}) {
   });
 
   // Plain IP endpoint
-  app.get('/ip', (c) => {
-    // @ts-expect-error - Cloudflare raw request binding if available
-    const cf = c.req.raw?.cf as CloudflareCfData | undefined;
+  v1.get('/ip', (c: Context) => {
     const clientIp = extractClientIp(c.req.raw.headers);
     c.header('Content-Type', 'text/plain; charset=utf-8');
     c.header('X-Client-IP', clientIp);
     return c.text(`${clientIp}\n`);
   });
 
-  // Dedicated JSON endpoint
-  app.get('/json', async (c) => {
-    // @ts-expect-error - Cloudflare raw request binding if available
-    const cf = c.req.raw?.cf as CloudflareCfData | undefined;
-    const clientIp = extractClientIp(c.req.raw.headers);
-    const data = buildIpResponse(clientIp, c.req.raw.headers, cf);
-    c.header('X-Client-IP', clientIp);
-    return c.json(data);
-  });
-
   // Dedicated Geo endpoint
-  app.get('/geo', async (c) => {
-    // @ts-expect-error - Cloudflare raw request binding if available
-    const cf = c.req.raw?.cf as CloudflareCfData | undefined;
+  v1.get('/geo', async (c: Context) => {
+    const cf = getCf(c);
     const clientIp = extractClientIp(c.req.raw.headers);
     const data = buildIpResponse(clientIp, c.req.raw.headers, cf);
     c.header('X-Client-IP', clientIp);
@@ -95,9 +88,8 @@ export function createIpApp(options: CreateAppOptions = {}) {
   });
 
   // Dedicated YAML endpoint
-  app.get('/yaml', async (c) => {
-    // @ts-expect-error - Cloudflare raw request binding if available
-    const cf = c.req.raw?.cf as CloudflareCfData | undefined;
+  v1.get('/yaml', async (c: Context) => {
+    const cf = getCf(c);
     const clientIp = extractClientIp(c.req.raw.headers);
     const data = buildIpResponse(clientIp, c.req.raw.headers, cf);
     c.header('Content-Type', 'text/yaml; charset=utf-8');
@@ -105,11 +97,10 @@ export function createIpApp(options: CreateAppOptions = {}) {
     return c.text(formatYaml(data));
   });
 
-  // Root endpoint: smart format based on client (curl vs browser vs json header)
-  app.get('/', async (c) => {
+  // Comprehensive Info endpoint (smart format: CLI text vs JSON)
+  v1.get('/info', async (c: Context) => {
     const rawHeaders = c.req.raw.headers;
-    // @ts-expect-error - Cloudflare raw request binding if available
-    const cf = c.req.raw?.cf as CloudflareCfData | undefined;
+    const cf = getCf(c);
     const clientIp = extractClientIp(rawHeaders);
     const data = buildIpResponse(clientIp, rawHeaders, cf);
 
@@ -131,9 +122,11 @@ export function createIpApp(options: CreateAppOptions = {}) {
       return c.text(formatPlaintext(data));
     }
 
-    // Default to JSON for browser requests unless specified otherwise
+    // Default to JSON for browser and API requests
     return c.json(data);
   });
+
+  app.route('/api/v1', v1);
 
   return app;
 }

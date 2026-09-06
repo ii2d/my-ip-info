@@ -24,32 +24,42 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
     {
       id: 'curl-ip',
       label: 'Get Plaintext IP (cURL)',
-      cmd: `curl -s ${baseEndpoint}/ip`,
+      cmd: `curl -s ${baseEndpoint}/api/v1/ip`,
     },
     {
       id: 'curl-v4',
       label: 'Force IPv4 Only',
-      cmd: `curl -4 -s ${baseEndpoint}/ip`,
+      cmd: `curl -4 -s ${baseEndpoint}/api/v1/ip`,
     },
     {
       id: 'curl-v6',
       label: 'Force IPv6 Only',
-      cmd: `curl -6 -s ${baseEndpoint}/ip`,
+      cmd: `curl -6 -s ${baseEndpoint}/api/v1/ip`,
+    },
+    {
+      id: 'curl-info',
+      label: 'Full Terminal Diagnostics (cURL)',
+      cmd: `curl -s ${baseEndpoint}/api/v1/info`,
     },
     {
       id: 'curl-json',
       label: 'Full JSON Intelligence (formatted with jq)',
-      cmd: `curl -s ${baseEndpoint}/json | jq .`,
+      cmd: `curl -s -H "Accept: application/json" ${baseEndpoint}/api/v1/info | jq .`,
     },
     {
       id: 'curl-geo',
       label: 'Geolocation & ASN Only',
-      cmd: `curl -s ${baseEndpoint}/geo | jq .`,
+      cmd: `curl -s ${baseEndpoint}/api/v1/geo | jq .`,
+    },
+    {
+      id: 'curl-yaml',
+      label: 'YAML Intelligence',
+      cmd: `curl -s ${baseEndpoint}/api/v1/yaml`,
     },
     {
       id: 'powershell',
       label: 'PowerShell (Windows)',
-      cmd: `(Invoke-RestMethod -Uri "${baseEndpoint}/json").ip`,
+      cmd: `(Invoke-RestMethod -Uri "${baseEndpoint}/api/v1/info").ip`,
     },
   ];
 
