@@ -26,9 +26,16 @@
     "destroy:web": "node scripts/destroy.mjs --web",
     "infra:preview": "pnpm --filter @my-ip/infra preview",
     "infra:up": "pnpm --filter @my-ip/infra up",
-    "infra:destroy": "pnpm --filter @my-ip/infra destroy"
+    "infra:destroy": "pnpm --filter @my-ip/infra destroy",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck": "pnpm -r typecheck",
+    "audit": "pnpm audit --registry=https://registry.npmjs.org/ --audit-level=high"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.12",
     "typescript": "^5.8.2"
   },
   "packageManager": "pnpm@12.3.4"

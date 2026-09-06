@@ -1,6 +1,6 @@
-import React from 'react';
-import { Shield, ShieldAlert, ShieldCheck, RefreshCw, Cpu, Globe } from 'lucide-react';
-import { WebRtcLeakResult } from '../types';
+import { Cpu, Globe, RefreshCw, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
+import type React from 'react';
+import type { WebRtcLeakResult } from '../types';
 
 interface WebRtcLeakCardProps {
   leakResult: WebRtcLeakResult & { reProbe: () => void };
@@ -13,9 +13,7 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
 
   // Check if WebRTC STUN revealed a different public IP than the HTTP API (indicating a VPN/Proxy leak)
   const stunWanIp = leakResult.publicIps[0];
-  const isVpnLeaked = Boolean(
-    primaryIpv4 && stunWanIp && primaryIpv4 !== stunWanIp
-  );
+  const isVpnLeaked = Boolean(primaryIpv4 && stunWanIp && primaryIpv4 !== stunWanIp);
 
   return (
     <div className="glass-card" style={{ padding: '1.75rem' }}>
@@ -32,12 +30,11 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Shield size={18} color="var(--accent-emerald)" />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-              WebRTC & STUN Leak Inspector
-            </h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>WebRTC & STUN Leak Inspector</h2>
           </div>
           <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-            Interrogates browser WebRTC ICE candidates to detect local LAN interfaces and VPN bypasses.
+            Interrogates browser WebRTC ICE candidates to detect local LAN interfaces and VPN
+            bypasses.
           </p>
         </div>
 
@@ -86,9 +83,13 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
               border: '1px solid rgba(255, 255, 255, 0.06)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}
+            >
               <Cpu size={15} color="var(--accent-cyan)" />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+              <span
+                style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-secondary)' }}
+              >
                 LOCAL NETWORK CANDIDATES (LAN)
               </span>
             </div>
@@ -97,8 +98,13 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {leakResult.localIps.map((ip) => (
                   <div key={ip} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="badge badge-cyan" style={{ fontSize: '0.6875rem' }}>Host</span>
-                    <span className="mono" style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                    <span className="badge badge-cyan" style={{ fontSize: '0.6875rem' }}>
+                      Host
+                    </span>
+                    <span
+                      className="mono"
+                      style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}
+                    >
                       {ip}
                     </span>
                   </div>
@@ -106,7 +112,9 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
               </div>
             ) : (
               <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                {isProbing ? 'Probing interfaces...' : 'No local IP exposed (mDNS protected or hidden)'}
+                {isProbing
+                  ? 'Probing interfaces...'
+                  : 'No local IP exposed (mDNS protected or hidden)'}
               </span>
             )}
           </div>
@@ -117,21 +125,34 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
               background: 'rgba(10, 16, 28, 0.6)',
               padding: '1.25rem',
               borderRadius: 'var(--radius-md)',
-              border: isVpnLeaked ? '1px solid rgba(244, 63, 94, 0.4)' : '1px solid rgba(255, 255, 255, 0.06)',
+              border: isVpnLeaked
+                ? '1px solid rgba(244, 63, 94, 0.4)'
+                : '1px solid rgba(255, 255, 255, 0.06)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}
+            >
               <Globe size={15} color="var(--accent-primary)" />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+              <span
+                style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-secondary)' }}
+              >
                 STUN REFLEXIVE CANDIDATE (WAN)
               </span>
             </div>
 
             {stunWanIp ? (
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span className="badge badge-emerald" style={{ fontSize: '0.6875rem' }}>srflx</span>
-                  <span className="mono" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}
+                >
+                  <span className="badge badge-emerald" style={{ fontSize: '0.6875rem' }}>
+                    srflx
+                  </span>
+                  <span
+                    className="mono"
+                    style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}
+                  >
                     {stunWanIp}
                   </span>
                 </div>
@@ -143,7 +164,9 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
               </div>
             ) : (
               <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                {isProbing ? 'Contacting Google STUN server...' : 'No reflexive STUN candidate returned'}
+                {isProbing
+                  ? 'Contacting Google STUN server...'
+                  : 'No reflexive STUN candidate returned'}
               </span>
             )}
           </div>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
 import { Check, Copy, Terminal, X } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 
 interface CliToolboxModalProps {
   isOpen: boolean;
@@ -18,7 +19,9 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
 
   if (!isOpen) return null;
 
-  const baseEndpoint = cloudflareUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://api.my-ip.info');
+  const baseEndpoint =
+    cloudflareUrl ||
+    (typeof window !== 'undefined' ? window.location.origin : 'https://api.my-ip.info');
 
   const commands = [
     {
@@ -75,9 +78,7 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Terminal size={18} color="var(--accent-cyan)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-              CLI & Developer Toolbox
-            </h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>CLI & Developer Toolbox</h3>
           </div>
           <button className="btn btn-ghost btn-icon" onClick={onClose}>
             <X size={18} />
@@ -86,7 +87,8 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
 
         <div className="modal-body">
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Query your deployed endpoints directly from your command line, CI/CD pipelines, or scripts.
+            Query your deployed endpoints directly from your command line, CI/CD pipelines, or
+            scripts.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -100,8 +102,17 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
                   border: '1px solid var(--border-subtle)',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '6px',
+                  }}
+                >
+                  <span
+                    style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}
+                  >
                     {item.label}
                   </span>
                   <button
@@ -110,7 +121,11 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
                     onClick={() => copyCmd(item.cmd, item.id)}
                     title="Copy command"
                   >
-                    {copiedKey === item.id ? <Check size={14} color="#34d399" /> : <Copy size={14} />}
+                    {copiedKey === item.id ? (
+                      <Check size={14} color="#34d399" />
+                    ) : (
+                      <Copy size={14} />
+                    )}
                   </button>
                 </div>
 

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import type { GeoLocationInfo } from '@my-ip/core';
 import { Check, Copy, Globe, MapPin, Shield, Wifi, Zap } from 'lucide-react';
-import { GeoLocationInfo } from '@my-ip/core';
+import type React from 'react';
+import { useState } from 'react';
 
 interface HeroCardProps {
   ipv4?: string;
@@ -38,7 +39,16 @@ export const HeroCard: React.FC<HeroCardProps> = ({
   return (
     <div className="glass-card" style={{ padding: '2rem 2.25rem' }}>
       {/* Top row: Status indicators & Network stats */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          marginBottom: '1.75rem',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <span className="pulse-dot" />
           <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
@@ -91,17 +101,44 @@ export const HeroCard: React.FC<HeroCardProps> = ({
             justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#38bdf8', letterSpacing: '0.05em' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.75rem',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#38bdf8',
+                letterSpacing: '0.05em',
+              }}
+            >
               PRIMARY IPv4
             </span>
-            <span className="badge badge-cyan" style={{ fontSize: '0.6875rem', padding: '1px 7px' }}>
+            <span
+              className="badge badge-cyan"
+              style={{ fontSize: '0.6875rem', padding: '1px 7px' }}
+            >
               A Record
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-            <span className="mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+            }}
+          >
+            <span
+              className="mono"
+              style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}
+            >
               {ipv4 || (isRefreshing ? 'Checking...' : 'Not Detected')}
             </span>
 
@@ -129,8 +166,22 @@ export const HeroCard: React.FC<HeroCardProps> = ({
             justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a855f7', letterSpacing: '0.05em' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.75rem',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#a855f7',
+                letterSpacing: '0.05em',
+              }}
+            >
               PRIMARY IPv6
             </span>
             <span
@@ -141,7 +192,14 @@ export const HeroCard: React.FC<HeroCardProps> = ({
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+            }}
+          >
             <span
               className="mono"
               style={{
@@ -185,7 +243,8 @@ export const HeroCard: React.FC<HeroCardProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <MapPin size={15} color="var(--accent-cyan)" />
               <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
-                {[geo?.city, geo?.region, geo?.country].filter(Boolean).join(', ') || 'Resolving location...'}
+                {[geo?.city, geo?.region, geo?.country].filter(Boolean).join(', ') ||
+                  'Resolving location...'}
               </span>
             </div>
             {geo?.timezone && (
@@ -203,9 +262,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
                 Internet Service Provider
               </span>
-              <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                {geo.asOrganization}
-              </span>
+              <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{geo.asOrganization}</span>
             </div>
           </div>
         )}

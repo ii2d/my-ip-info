@@ -1,5 +1,5 @@
-import React from 'react';
-import { Activity, Globe, RefreshCw, Server, Terminal, Settings } from 'lucide-react';
+import { Activity, Globe, RefreshCw, Server, Settings, Terminal } from 'lucide-react';
+import type React from 'react';
 
 interface NavbarProps {
   isRefreshing: boolean;
@@ -36,11 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       <div className="nav-actions">
-        <button
-          className="btn btn-ghost"
-          onClick={onOpenCliModal}
-          title="CLI / cURL commands"
-        >
+        <button className="btn btn-ghost" onClick={onOpenCliModal} title="CLI / cURL commands">
           <Terminal size={16} />
           <span>cURL / CLI</span>
         </button>
@@ -53,7 +49,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Server size={16} />
           <span>Custom APIs</span>
           {activeEndpointsCount > 0 && (
-            <span className="badge badge-cyan" style={{ padding: '1px 6px', fontSize: '0.6875rem' }}>
+            <span
+              className="badge badge-cyan"
+              style={{ padding: '1px 6px', fontSize: '0.6875rem' }}
+            >
               {activeEndpointsCount}
             </span>
           )}
@@ -67,11 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Settings size={17} />
         </button>
 
-        <button
-          className="btn btn-primary"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-        >
+        <button className="btn btn-primary" onClick={onRefresh} disabled={isRefreshing}>
           <RefreshCw size={15} className={isRefreshing ? 'spin-anim' : ''} />
           <span>{isRefreshing ? 'Checking...' : 'Refresh'}</span>
         </button>

@@ -1,4 +1,4 @@
-import { IpInfoResponse } from './types';
+import type { IpInfoResponse } from './types';
 
 const CLI_USER_AGENTS = ['curl', 'wget', 'httpie', 'fetch', 'axios', 'urllib', 'python-requests'];
 

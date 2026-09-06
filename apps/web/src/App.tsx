@@ -1,21 +1,18 @@
-import React, { useMemo, useState } from 'react';
-import { Navbar } from './components/Navbar';
-import { HeroCard } from './components/HeroCard';
-import { ComparisonMatrix } from './components/ComparisonMatrix';
-import { WorldMap } from './components/WorldMap';
-import { WebRtcLeakCard } from './components/WebRtcLeakCard';
-import { CustomEndpointModal } from './components/CustomEndpointModal';
+import { Code2, Heart } from 'lucide-react';
+import type React from 'react';
+import { useMemo, useState } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';
+import { ComparisonMatrix } from './components/ComparisonMatrix';
+import { CustomEndpointModal } from './components/CustomEndpointModal';
+import { HeroCard } from './components/HeroCard';
+import { Navbar } from './components/Navbar';
 import { SettingsModal } from './components/SettingsModal';
+import { WebRtcLeakCard } from './components/WebRtcLeakCard';
+import { WorldMap } from './components/WorldMap';
 import { useMultiSourceIp } from './hooks/useMultiSourceIp';
 import { useWebRtcLeak } from './hooks/useWebRtcLeak';
-import {
-  PUBLIC_PROVIDERS,
-  getCustomEndpointProviders,
-  getSelfHostedProviders,
-} from './providers';
-import { CustomEndpoint } from './types';
-import { Code2, Heart } from 'lucide-react';
+import { getCustomEndpointProviders, getSelfHostedProviders, PUBLIC_PROVIDERS } from './providers';
+import type { CustomEndpoint } from './types';
 
 const STORAGE_CUSTOM_ENDPOINTS = 'my-ip-info:custom-endpoints';
 const STORAGE_CONFIG = 'my-ip-info:config';
@@ -59,15 +56,8 @@ export const App: React.FC = () => {
   }, [cloudConfig, customEndpoints]);
 
   // Query engine hooks
-  const {
-    resultsList,
-    isRefreshing,
-    primaryIpv4,
-    primaryIpv6,
-    primaryGeo,
-    avgLatency,
-    refresh,
-  } = useMultiSourceIp(activeProviders);
+  const { resultsList, isRefreshing, primaryIpv4, primaryIpv6, primaryGeo, avgLatency, refresh } =
+    useMultiSourceIp(activeProviders);
 
   const leakResult = useWebRtcLeak();
 
@@ -173,7 +163,13 @@ export const App: React.FC = () => {
             href="https://github.com/ii2d/my-ip-info"
             target="_blank"
             rel="noreferrer"
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', textDecoration: 'none' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              color: 'var(--text-secondary)',
+              textDecoration: 'none',
+            }}
           >
             <Code2 size={15} />
             <span>GitHub Repository</span>

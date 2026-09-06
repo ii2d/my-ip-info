@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Check, Copy, ExternalLink, ShieldCheck, ShieldAlert, WifiOff } from 'lucide-react';
-import { ProviderResult } from '../types';
+import { Check, Copy, ExternalLink, ShieldAlert, ShieldCheck, WifiOff } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import type { ProviderResult } from '../types';
 
 interface ComparisonMatrixProps {
   results: ProviderResult[];
@@ -29,12 +30,15 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
   const getLatencyBadge = (ms?: number) => {
     if (ms === undefined) return <span style={{ color: 'var(--text-muted)' }}>-</span>;
     let color = '#34d399'; // green
-    if (ms > 100 && ms <= 300) color = '#38bdf8'; // cyan
+    if (ms > 100 && ms <= 300)
+      color = '#38bdf8'; // cyan
     else if (ms > 300) color = '#fbbf24'; // amber
 
     return (
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: color }} />
+        <span
+          style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: color }}
+        />
         <span className="mono" style={{ fontSize: '0.8125rem', color }}>
           {ms} ms
         </span>
@@ -44,11 +48,18 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
 
   return (
     <div className="glass-card" style={{ padding: '1.75rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.25rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+        }}
+      >
         <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-            Multi-Source Comparison Grid
-          </h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Multi-Source Comparison Grid</h2>
           <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '2px' }}>
             Real-time cross-validation across edge functions, serverless backends, and public APIs.
           </p>
@@ -69,7 +80,15 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <tr
+              style={{
+                borderBottom: '1px solid var(--border-subtle)',
+                color: 'var(--text-muted)',
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               <th style={{ padding: '0.75rem 1rem' }}>Source / Provider</th>
               <th style={{ padding: '0.75rem 1rem' }}>Detected IP</th>
               <th style={{ padding: '0.75rem 1rem' }}>Type</th>
@@ -89,13 +108,21 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
                     borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
                     transition: 'background var(--transition-fast)',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)')}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)')
+                  }
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   {/* Provider Name & Category */}
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--text-primary)' }}>
+                      <span
+                        style={{
+                          fontWeight: 600,
+                          fontSize: '0.9375rem',
+                          color: 'var(--text-primary)',
+                        }}
+                      >
                         {result.providerName}
                       </span>
                       <div>{getCategoryBadge(result.category)}</div>
@@ -105,9 +132,19 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
                   {/* Detected IP */}
                   <td style={{ padding: '1rem' }}>
                     {result.status === 'loading' ? (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Querying...</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                        Querying...
+                      </span>
                     ) : result.status === 'error' ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#fb7185', fontSize: '0.8125rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          color: '#fb7185',
+                          fontSize: '0.8125rem',
+                        }}
+                      >
                         <WifiOff size={14} />
                         <span>{result.errorMessage || 'Failed'}</span>
                       </div>
@@ -129,7 +166,9 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
                   <td style={{ padding: '1rem' }}>
                     {result.version ? (
                       <span
-                        className={result.version === 'IPv6' ? 'badge badge-cyan' : 'badge badge-emerald'}
+                        className={
+                          result.version === 'IPv6' ? 'badge badge-cyan' : 'badge badge-emerald'
+                        }
                         style={{ fontSize: '0.6875rem' }}
                       >
                         {result.version}
@@ -152,7 +191,13 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
                   <td style={{ padding: '1rem' }}>
                     {result.geo ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                        <span
+                          style={{
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
+                            color: 'var(--text-primary)',
+                          }}
+                        >
                           {[result.geo.city, result.geo.country].filter(Boolean).join(', ')}
                         </span>
                         {result.geo.asOrganization && (
@@ -162,7 +207,9 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({ results }) =
                         )}
                       </div>
                     ) : (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>IP Only</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
+                        IP Only
+                      </span>
                     )}
                   </td>
 

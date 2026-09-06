@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { IpProvider, ProviderResult } from '../types';
+import type { IpProvider, ProviderResult } from '../types';
 
 export function useMultiSourceIp(providers: IpProvider[]) {
   const [results, setResults] = useState<Record<string, ProviderResult>>({});

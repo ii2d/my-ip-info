@@ -2,7 +2,7 @@
 
 /**
  * deploy.mjs
- * 
+ *
  * Orchestrates Cloudflare deployments:
  *   --api : Deploys the Cloudflare Worker API & syncs endpoint to frontend
  *   --web : Builds & deploys the React dashboard to Cloudflare Pages
@@ -36,7 +36,10 @@ function loadEnv() {
     loaded.push(file);
 
     if (typeof process.loadEnvFile === 'function') {
-      try { process.loadEnvFile(fp); continue; } catch {}
+      try {
+        process.loadEnvFile(fp);
+        continue;
+      } catch {}
     }
 
     const lines = fs.readFileSync(fp, 'utf8').split('\n');
@@ -46,7 +49,10 @@ function loadEnv() {
       const idx = trimmed.indexOf('=');
       if (idx === -1) continue;
       const key = trimmed.slice(0, idx).trim();
-      const val = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+      const val = trimmed
+        .slice(idx + 1)
+        .trim()
+        .replace(/^["']|["']$/g, '');
       if (key && !(key in process.env)) process.env[key] = val;
     }
   }
@@ -92,7 +98,10 @@ if (fs.existsSync(webEnvPath)) {
   for (const line of content.split('\n')) {
     const trimmed = line.trim();
     if (trimmed.startsWith('VITE_CLOUDFLARE_URL=')) {
-      apiUrl = trimmed.replace('VITE_CLOUDFLARE_URL=', '').trim().replace(/^["']|["']$/g, '');
+      apiUrl = trimmed
+        .replace('VITE_CLOUDFLARE_URL=', '')
+        .trim()
+        .replace(/^["']|["']$/g, '');
     }
   }
 }
@@ -101,8 +110,10 @@ async function main() {
   // ===========================================================================
   // Step 1: Deploy API (Cloudflare Worker)
   // ===========================================================================
-  const workerAccountId = process.env.CLOUDFLARE_WORKER_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
-  const pagesAccountId = process.env.CLOUDFLARE_PAGES_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+  const workerAccountId =
+    process.env.CLOUDFLARE_WORKER_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+  const pagesAccountId =
+    process.env.CLOUDFLARE_PAGES_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
 
   // ===========================================================================
   // Step 1: Deploy API (Cloudflare Worker)
@@ -111,7 +122,9 @@ async function main() {
     console.log('\n📦 Deploying Cloudflare Worker API (apps/server-cloudflare)...');
 
     if (!workerAccountId) {
-      console.log('   ℹ️  No Cloudflare Account ID specified in .env (CLOUDFLARE_WORKER_ACCOUNT_ID or CLOUDFLARE_ACCOUNT_ID).');
+      console.log(
+        '   ℹ️  No Cloudflare Account ID specified in .env (CLOUDFLARE_WORKER_ACCOUNT_ID or CLOUDFLARE_ACCOUNT_ID).'
+      );
       console.log('      Run `npx wrangler whoami` to find and set your account ID.\n');
     } else {
       console.log(`   Target Account ID: ${workerAccountId}`);
@@ -119,17 +132,24 @@ async function main() {
 
     try {
       const workerName = process.env.CLOUDFLARE_WORKER_NAME || 'my-ip-info';
-      const domainFlag = process.env.CLOUDFLARE_WORKER_DOMAIN ? ` --domain ${process.env.CLOUDFLARE_WORKER_DOMAIN}` : '';
+      const domainFlag = process.env.CLOUDFLARE_WORKER_DOMAIN
+        ? ` --domain ${process.env.CLOUDFLARE_WORKER_DOMAIN}`
+        : '';
       const workerEnv = workerAccountId ? { CLOUDFLARE_ACCOUNT_ID: workerAccountId } : {};
 
-      console.log(`   Deploying Worker: '${workerName}'${process.env.CLOUDFLARE_WORKER_DOMAIN ? ` (Domain: ${process.env.CLOUDFLARE_WORKER_DOMAIN})` : ''}...`);
-      const output = runCmd(`npx wrangler deploy --name ${workerName}${domainFlag}`, { cwd: cfDir, env: workerEnv });
+      console.log(
+        `   Deploying Worker: '${workerName}'${process.env.CLOUDFLARE_WORKER_DOMAIN ? ` (Domain: ${process.env.CLOUDFLARE_WORKER_DOMAIN})` : ''}...`
+      );
+      const output = runCmd(`npx wrangler deploy --name ${workerName}${domainFlag}`, {
+        cwd: cfDir,
+        env: workerEnv,
+      });
       console.log(output);
 
       if (process.env.CLOUDFLARE_WORKER_DOMAIN) {
         apiUrl = `https://${process.env.CLOUDFLARE_WORKER_DOMAIN}`;
       } else {
-        const match = output.match(/https:\/\/[a-zA-Z0-9-_\.]+\.workers\.dev/);
+        const match = output.match(/https:\/\/[a-zA-Z0-9-_.]+\.workers\.dev/);
         if (match) apiUrl = match[0];
       }
 
@@ -173,7 +193,10 @@ async function main() {
 
     // 2. Ensure Pages project exists
     try {
-      runCmd(`npx wrangler pages project create ${projectName} --production-branch main`, { stdio: 'pipe', env: pagesEnv });
+      runCmd(`npx wrangler pages project create ${projectName} --production-branch main`, {
+        stdio: 'pipe',
+        env: pagesEnv,
+      });
       console.log(`   ✨ Created Pages project: '${projectName}'`);
     } catch {
       // Already exists
@@ -207,7 +230,9 @@ async function main() {
           const data = await res.json();
           if (data.success) {
             console.log(`   ✅ Domain '${customDomain}' successfully registered!`);
-          } else if (data.errors?.some((e) => e.message?.includes('already exists') || e.code === 8000009)) {
+          } else if (
+            data.errors?.some((e) => e.message?.includes('already exists') || e.code === 8000009)
+          ) {
             console.log(`   ℹ️  Domain '${customDomain}' is active on Pages project.`);
           }
         } catch (err) {
@@ -216,7 +241,9 @@ async function main() {
       }
     }
 
-    console.log(`✅ Web UI live at: ${customDomain ? `https://${customDomain}` : `https://${projectName}.pages.dev`}`);
+    console.log(
+      `✅ Web UI live at: ${customDomain ? `https://${customDomain}` : `https://${projectName}.pages.dev`}`
+    );
   }
 
   console.log('\n🎉 Deployment Complete!');
@@ -225,7 +252,9 @@ async function main() {
   if (deployAll || isWebOnly) {
     const projectName = process.env.CLOUDFLARE_PAGES_PROJECT_NAME || 'my-ip-info';
     const domain = process.env.CLOUDFLARE_PAGES_DOMAIN;
-    console.log(`👉 Web Frontend: ${domain ? `https://${domain}` : `https://${projectName}.pages.dev`}`);
+    console.log(
+      `👉 Web Frontend: ${domain ? `https://${domain}` : `https://${projectName}.pages.dev`}`
+    );
   }
   console.log();
 }
