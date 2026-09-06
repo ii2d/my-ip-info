@@ -1,4 +1,4 @@
-import { GeoLocationInfo, IpVersion } from '@my-ip/core';
+import type { GeoLocationInfo, IpVersion } from '@my-ip/core';
 
 export type ProviderCategory = 'self-hosted' | 'public' | 'webrtc' | 'custom';
 

@@ -2,7 +2,7 @@
 
 /**
  * destroy.mjs
- * 
+ *
  * Safely tears down deployed Cloudflare services:
  *   --api : Deletes Cloudflare Worker
  *   --web : Deletes Cloudflare Pages project
@@ -31,7 +31,10 @@ function loadEnv() {
     const fp = path.resolve(rootDir, file);
     if (!fs.existsSync(fp)) continue;
     if (typeof process.loadEnvFile === 'function') {
-      try { process.loadEnvFile(fp); continue; } catch {}
+      try {
+        process.loadEnvFile(fp);
+        continue;
+      } catch {}
     }
     const lines = fs.readFileSync(fp, 'utf8').split('\n');
     for (const line of lines) {
@@ -40,7 +43,10 @@ function loadEnv() {
       const idx = trimmed.indexOf('=');
       if (idx === -1) continue;
       const key = trimmed.slice(0, idx).trim();
-      const val = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+      const val = trimmed
+        .slice(idx + 1)
+        .trim()
+        .replace(/^["']|["']$/g, '');
       if (key && !(key in process.env)) process.env[key] = val;
     }
   }
@@ -89,8 +95,10 @@ async function main() {
     process.exit(0);
   }
 
-  const workerAccountId = process.env.CLOUDFLARE_WORKER_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
-  const pagesAccountId = process.env.CLOUDFLARE_PAGES_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+  const workerAccountId =
+    process.env.CLOUDFLARE_WORKER_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+  const pagesAccountId =
+    process.env.CLOUDFLARE_PAGES_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
 
   // 1. Destroy Cloudflare Worker
   if (destroyAll || isApiOnly) {
@@ -98,13 +106,20 @@ async function main() {
     const cfDir = path.resolve(rootDir, 'apps', 'server-cloudflare');
     try {
       const workerName = process.env.CLOUDFLARE_WORKER_NAME || 'my-ip-info';
-      console.log(`   Deleting Worker '${workerName}'${workerAccountId ? ` (Account ID: ${workerAccountId})` : ''}...`);
+      console.log(
+        `   Deleting Worker '${workerName}'${workerAccountId ? ` (Account ID: ${workerAccountId})` : ''}...`
+      );
       const workerEnv = workerAccountId ? { CLOUDFLARE_ACCOUNT_ID: workerAccountId } : {};
-      const output = runCmd(`npx wrangler delete ${workerName} --force`, { cwd: cfDir, env: workerEnv });
+      const output = runCmd(`npx wrangler delete ${workerName} --force`, {
+        cwd: cfDir,
+        env: workerEnv,
+      });
       console.log(output);
       console.log(`✅ Cloudflare Worker '${workerName}' removed.`);
     } catch (err) {
-      console.warn('⚠️ Could not delete Cloudflare Worker (it may not exist or wrangler is unauthenticated).');
+      console.warn(
+        '⚠️ Could not delete Cloudflare Worker (it may not exist or wrangler is unauthenticated).'
+      );
       if (err.stdout) console.log(err.stdout);
     }
   }
@@ -114,13 +129,20 @@ async function main() {
     console.log('\n🧹 Destroying Cloudflare Pages Web Project...');
     const projectName = process.env.CLOUDFLARE_PAGES_PROJECT_NAME || 'my-ip-info';
     try {
-      console.log(`   Deleting Pages project '${projectName}'${pagesAccountId ? ` (Account ID: ${pagesAccountId})` : ''}...`);
+      console.log(
+        `   Deleting Pages project '${projectName}'${pagesAccountId ? ` (Account ID: ${pagesAccountId})` : ''}...`
+      );
       const pagesEnv = pagesAccountId ? { CLOUDFLARE_ACCOUNT_ID: pagesAccountId } : {};
-      const output = runCmd(`npx wrangler pages project delete ${projectName} --yes`, { cwd: rootDir, env: pagesEnv });
+      const output = runCmd(`npx wrangler pages project delete ${projectName} --yes`, {
+        cwd: rootDir,
+        env: pagesEnv,
+      });
       console.log(output);
       console.log(`✅ Cloudflare Pages project '${projectName}' deleted.`);
     } catch (err) {
-      console.warn(`⚠️ Could not delete Cloudflare Pages project '${projectName}' (it may not exist).`);
+      console.warn(
+        `⚠️ Could not delete Cloudflare Pages project '${projectName}' (it may not exist).`
+      );
       if (err.stdout) console.log(err.stdout);
     }
   }

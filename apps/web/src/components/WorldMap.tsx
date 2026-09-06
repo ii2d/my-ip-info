@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { ProviderResult } from '../types';
 import { MapPin, Navigation } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useRef } from 'react';
+import type { ProviderResult } from '../types';
 
 interface WorldMapProps {
   results: ProviderResult[];
@@ -47,13 +48,10 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
       // OpenStreetMap tile layer with CSS dark invert filter
-      L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-          maxZoom: 19,
-          className: 'map-tiles-dark',
-        }
-      ).addTo(map);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        className: 'map-tiles-dark',
+      }).addTo(map);
 
       markersLayerRef.current = L.layerGroup().addTo(map);
       mapInstanceRef.current = map;
@@ -149,9 +147,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Navigation size={18} color="var(--accent-cyan)" />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-              Geolocation Convergence Map
-            </h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Geolocation Convergence Map</h2>
           </div>
           <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '2px' }}>
             Visualizes where each provider and geo database resolves your coordinates.

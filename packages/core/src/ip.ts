@@ -1,6 +1,7 @@
-import { IpVersion } from './types';
+import type { IpVersion } from './types';
 
-const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+const IPV4_REGEX =
+  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 const IPV6_REGEX = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$|^(?:[A-F0-9]{1,4}:)*:[A-F0-9]{1,4}$/i;
 
 export function getIpVersion(rawIp: string): IpVersion {
@@ -85,7 +86,13 @@ export function isBogonIp(rawIp: string): boolean {
     // Unique local address fc00::/7 (fc00... or fd00...)
     if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
     // Link-local fe80::/10
-    if (lower.startsWith('fe8') || lower.startsWith('fe9') || lower.startsWith('fea') || lower.startsWith('feb')) return true;
+    if (
+      lower.startsWith('fe8') ||
+      lower.startsWith('fe9') ||
+      lower.startsWith('fea') ||
+      lower.startsWith('feb')
+    )
+      return true;
     // Discard prefix 100::/64
     if (lower.startsWith('100:')) return true;
     // Documentation 2001:db8::/32

@@ -1,14 +1,14 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 import {
-  getIpVersion,
-  isBogonIp,
   cleanIpAddress,
+  createIpApp,
   extractClientIp,
   extractCloudflareGeo,
-  isCliRequest,
   formatPlaintext,
-  createIpApp,
+  getIpVersion,
+  isBogonIp,
+  isCliRequest,
 } from '../src/index';
 
 describe('IP Utility Tests', () => {
@@ -172,4 +172,3 @@ describe('App Routing & Versioning Tests', () => {
     assert.equal(healthRes.status, 404);
   });
 });
-

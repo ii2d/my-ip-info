@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, X, CheckCircle2, AlertCircle, Play, Server } from 'lucide-react';
-import { CustomEndpoint } from '../types';
+import { AlertCircle, CheckCircle2, Play, Plus, Server, Trash2, X } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import type { CustomEndpoint } from '../types';
 
 interface CustomEndpointModalProps {
   isOpen: boolean;
@@ -42,7 +43,9 @@ export const CustomEndpointModal: React.FC<CustomEndpointModalProps> = ({
       if (contentType.includes('application/json')) {
         const data = await res.json();
         setTestStatus('success');
-        setTestMessage(`Success! Responded in ${latency}ms. Detected IP: ${data.ip || data.query || 'N/A'}`);
+        setTestMessage(
+          `Success! Responded in ${latency}ms. Detected IP: ${data.ip || data.query || 'N/A'}`
+        );
       } else {
         const text = (await res.text()).trim();
         setTestStatus('success');
@@ -80,9 +83,7 @@ export const CustomEndpointModal: React.FC<CustomEndpointModalProps> = ({
   };
 
   const handleToggle = (id: string) => {
-    const updated = endpoints.map((ep) =>
-      ep.id === id ? { ...ep, enabled: !ep.enabled } : ep
-    );
+    const updated = endpoints.map((ep) => (ep.id === id ? { ...ep, enabled: !ep.enabled } : ep));
     onSaveEndpoints(updated);
     onRefreshAll();
   };
@@ -104,7 +105,8 @@ export const CustomEndpointModal: React.FC<CustomEndpointModalProps> = ({
 
         <div className="modal-body">
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Add your own deployed Cloudflare Worker, AWS Lambda, Firebase Function, or external IP service to cross-validate in real-time.
+            Add your own deployed Cloudflare Worker, AWS Lambda, Firebase Function, or external IP
+            service to cross-validate in real-time.
           </p>
 
           {/* Add New Endpoint Form */}
@@ -188,7 +190,14 @@ export const CustomEndpointModal: React.FC<CustomEndpointModalProps> = ({
 
           {/* List of Custom Endpoints */}
           <div>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+            <h4
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                marginBottom: '0.75rem',
+              }}
+            >
               Active Endpoints ({endpoints.length})
             </h4>
 
@@ -219,10 +228,19 @@ export const CustomEndpointModal: React.FC<CustomEndpointModalProps> = ({
                         style={{ cursor: 'pointer' }}
                       />
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
+                            color: 'var(--text-primary)',
+                          }}
+                        >
                           {ep.name}
                         </div>
-                        <div className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        <div
+                          className="mono"
+                          style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}
+                        >
                           {ep.url}
                         </div>
                       </div>

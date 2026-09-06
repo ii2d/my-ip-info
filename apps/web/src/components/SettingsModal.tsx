@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Save, Settings, X, Cloud } from 'lucide-react';
+import { Cloud, Save, Settings, X } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -36,9 +37,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Settings size={18} color="var(--accent-primary)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-              Backend Endpoint Configuration
-            </h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Backend Endpoint Configuration</h3>
           </div>
           <button className="btn btn-ghost btn-icon" onClick={onClose}>
             <X size={18} />
@@ -47,7 +46,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <div className="modal-body">
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Configure your self-hosted Cloudflare Worker URL. This can also be populated automatically via <code className="mono">pnpm deploy</code> into <code className="mono">apps/web/.env.local</code>.
+            Configure your self-hosted Cloudflare Worker URL. This can also be populated
+            automatically via <code className="mono">pnpm deploy</code> into{' '}
+            <code className="mono">apps/web/.env.local</code>.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -67,7 +68,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem' }}>
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem' }}
+          >
             <button className="btn btn-ghost" onClick={onClose}>
               Cancel
             </button>

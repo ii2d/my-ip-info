@@ -1,9 +1,9 @@
-import { Hono, type Context } from 'hono';
+import { type Context, Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { getIpVersion, isBogonIp } from './ip';
 import { extractClientIp, extractCloudflareGeo } from './extractors';
 import { formatPlaintext, formatYaml, isCliRequest } from './formatters';
-import { CloudflareCfData, IpInfoResponse } from './types';
+import { getIpVersion, isBogonIp } from './ip';
+import type { CloudflareCfData, IpInfoResponse } from './types';
 
 export interface CreateAppOptions {
   providerName?: string;
@@ -15,13 +15,16 @@ export function createIpApp(options: CreateAppOptions = {}) {
   const app = new Hono();
 
   // Enable CORS for all routes
-  app.use('*', cors({
-    origin: '*',
-    allowMethods: ['GET', 'HEAD', 'OPTIONS'],
-    allowHeaders: ['*'],
-    exposeHeaders: ['Content-Length', 'X-Client-IP'],
-    maxAge: 86400,
-  }));
+  app.use(
+    '*',
+    cors({
+      origin: '*',
+      allowMethods: ['GET', 'HEAD', 'OPTIONS'],
+      allowHeaders: ['*'],
+      exposeHeaders: ['Content-Length', 'X-Client-IP'],
+      maxAge: 86400,
+    })
+  );
 
   const buildIpResponse = (
     clientIp: string,
@@ -39,7 +42,7 @@ export function createIpApp(options: CreateAppOptions = {}) {
       acceptLanguage: reqHeaders.get('accept-language') || undefined,
       referer: reqHeaders.get('referer') || undefined,
       host: reqHeaders.get('host') || undefined,
-      protocol: runtimeProtocol || (reqHeaders.get('x-forwarded-proto') || 'https'),
+      protocol: runtimeProtocol || reqHeaders.get('x-forwarded-proto') || 'https',
       tlsVersion: cfData?.tlsVersion,
       tlsCipher: cfData?.tlsCipher,
     };

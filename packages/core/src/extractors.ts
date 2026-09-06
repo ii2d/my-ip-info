@@ -1,5 +1,5 @@
 import { cleanIpAddress } from './ip';
-import { CloudflareCfData, GeoLocationInfo } from './types';
+import type { CloudflareCfData, GeoLocationInfo } from './types';
 
 export interface ExtractedClientData {
   clientIp: string;

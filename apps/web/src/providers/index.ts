@@ -1,5 +1,5 @@
 import { getIpVersion, isBogonIp } from '@my-ip/core';
-import { CustomEndpoint, IpProvider } from '../types';
+import type { CustomEndpoint, IpProvider } from '../types';
 
 export const PUBLIC_PROVIDERS: IpProvider[] = [
   {
@@ -82,9 +82,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
 /**
  * Builds self-hosted providers using configured or environment URLs
  */
-export function getSelfHostedProviders(config: {
-  cloudflareUrl?: string;
-}): IpProvider[] {
+export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpProvider[] {
   const providers: IpProvider[] = [];
 
   if (config.cloudflareUrl) {

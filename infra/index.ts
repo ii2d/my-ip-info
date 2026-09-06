@@ -1,13 +1,12 @@
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as pulumi from '@pulumi/pulumi';
 import * as cloudflare from '@pulumi/cloudflare';
+import * as pulumi from '@pulumi/pulumi';
 import * as dotenv from 'dotenv';
 
 // Determine directory path in both CommonJS and ESM environments
-const currentDir = typeof __dirname !== 'undefined'
-  ? __dirname
-  : path.dirname(fileURLToPath(import.meta.url));
+const currentDir =
+  typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 // -----------------------------------------------------------------------------
 // Load environment variables (supports monorepo root and local directory)
@@ -43,8 +42,8 @@ if (managePagesDomain && !accountId) {
 if (missingVars.length > 0) {
   throw new Error(
     `Missing required environment variable(s):\n  - ${missingVars.join('\n  - ')}\n\n` +
-    `Please configure these in your .env file or export them before running Pulumi.\n` +
-    `Refer to .env.example for configuration details.`
+      `Please configure these in your .env file or export them before running Pulumi.\n` +
+      `Refer to .env.example for configuration details.`
   );
 }
 
@@ -60,28 +59,36 @@ const provider = new cloudflare.Provider('cf-provider', {
 // -----------------------------------------------------------------------------
 let pagesDomain: cloudflare.PagesDomain | undefined;
 if (managePagesDomain) {
-  pagesDomain = new cloudflare.PagesDomain('pages-domain', {
-    accountId: accountId!,
-    projectName,
-    name: customDomain!,
-  }, { provider });
+  pagesDomain = new cloudflare.PagesDomain(
+    'pages-domain',
+    {
+      accountId: accountId!,
+      projectName,
+      name: customDomain!,
+    },
+    { provider }
+  );
 }
 
 // -----------------------------------------------------------------------------
 // 2. Create proxied CNAME DNS record in Cloudflare zone
 // -----------------------------------------------------------------------------
-const dnsRecord = new cloudflare.DnsRecord('pages-cname', {
-  zoneId: zoneId!,
-  name: customDomain!,
-  type: 'CNAME',
-  content: cnameTarget,
-  proxied: true,
-  ttl: 1, // Automatic TTL when proxied
-  comment: `Managed by Pulumi for Pages project ${projectName}`,
-}, {
-  provider,
-  dependsOn: pagesDomain ? [pagesDomain] : [],
-});
+const dnsRecord = new cloudflare.DnsRecord(
+  'pages-cname',
+  {
+    zoneId: zoneId!,
+    name: customDomain!,
+    type: 'CNAME',
+    content: cnameTarget,
+    proxied: true,
+    ttl: 1, // Automatic TTL when proxied
+    comment: `Managed by Pulumi for Pages project ${projectName}`,
+  },
+  {
+    provider,
+    dependsOn: pagesDomain ? [pagesDomain] : [],
+  }
+);
 
 // -----------------------------------------------------------------------------
 // Stack outputs

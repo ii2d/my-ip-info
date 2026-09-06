@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
 import { isBogonIp } from '@my-ip/core';
-import { WebRtcLeakResult } from '../types';
+import { useCallback, useEffect, useState } from 'react';
+import type { WebRtcLeakResult } from '../types';
 
 export function useWebRtcLeak() {
   const [result, setResult] = useState<WebRtcLeakResult>({
