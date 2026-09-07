@@ -15,6 +15,7 @@
     "dev:node": "tsx src/server/node.ts",
     "build": "vite build",
     "deploy": "pnpm build && wrangler deploy",
+    "undeploy": "wrangler delete",
     "test": "tsx --test test/core.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
