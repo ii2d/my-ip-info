@@ -9,7 +9,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://1.1.1.1/cdn-cgi/trace',
     description: 'Cloudflare direct edge trace endpoint',
     fetchIp: async () => {
-      const res = await fetch('https://1.1.1.1/cdn-cgi/trace', { cache: 'no-store' });
+      const res = await fetch(`https://1.1.1.1/cdn-cgi/trace?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       const ipMatch = text.match(/^ip=(.+)$/m);
@@ -30,7 +30,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://api.ipify.org?format=json',
     description: 'High-availability public IPv4 resolution',
     fetchIp: async () => {
-      const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
+      const res = await fetch(`https://api.ipify.org?format=json&t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
@@ -46,7 +46,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://api64.ipify.org?format=json',
     description: 'Dual-stack public IP resolution (prefers IPv6)',
     fetchIp: async () => {
-      const res = await fetch('https://api64.ipify.org?format=json', { cache: 'no-store' });
+      const res = await fetch(`https://api64.ipify.org?format=json&t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
@@ -62,7 +62,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://ipapi.co/json/',
     description: 'Public geolocation and ASN lookup',
     fetchIp: async () => {
-      const res = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+      const res = await fetch(`https://ipapi.co/json/?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
@@ -88,7 +88,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://icanhazip.com',
     description: 'Cloudflare-backed plaintext IP reflection',
     fetchIp: async () => {
-      const res = await fetch('https://icanhazip.com', { cache: 'no-store' });
+      const res = await fetch(`https://icanhazip.com?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const raw = (await res.text()).trim();
       return {
@@ -114,8 +114,12 @@ export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpPr
       endpointUrl: endpointDisplay,
       description: 'Edge Worker with native CF Geo, ASN & TLS headers',
       fetchIp: async () => {
-        const fetchUrl = baseUrl ? new URL('/api/v1/info', baseUrl).toString() : '/api/v1/info';
-        const res = await fetch(fetchUrl, {
+        const urlObj = baseUrl
+          ? new URL('/api/v1/info', baseUrl)
+          : new URL('/api/v1/info', window.location.origin);
+        urlObj.searchParams.set('t', Date.now().toString());
+
+        const res = await fetch(urlObj.toString(), {
           cache: 'no-store',
           headers: { Accept: 'application/json' },
         });
@@ -159,6 +163,15 @@ export function getCustomEndpointProviders(customEndpoints: CustomEndpoint[]): I
           } catch {
             // keep targetUrl as is
           }
+        }
+
+        // Add timestamp cache-buster parameter to ensure zero caching
+        try {
+          const parsed = new URL(targetUrl, window.location.origin);
+          parsed.searchParams.set('t', Date.now().toString());
+          targetUrl = parsed.toString();
+        } catch {
+          // keep targetUrl as is
         }
 
         const res = await fetch(targetUrl, {
