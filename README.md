@@ -1,6 +1,8 @@
 # 🌐 my-ip-info
 
 > An open-source, high-performance IP intelligence and network connectivity diagnostic suite built as a unified Cloudflare Worker with Static Assets.
+>
+> 🚀 **Live Deployment**: [https://my-ip-info.ii2d-dev.workers.dev](https://my-ip-info.ii2d-dev.workers.dev)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -17,13 +19,13 @@ Most IP lookup tools query a single remote server. **my-ip-info** cross-validate
 - ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to global Anycast edge nodes.
 - 💻 **CLI & cURL Friendly**: Direct terminal support at root `/` and versioned `/api/v1` routes:
   ```bash
-  curl https://your-worker.workers.dev/                       # Plaintext IP (auto-detected CLI)
-  curl https://your-worker.workers.dev/ip                     # Plaintext IP shorthand
-  curl https://your-worker.workers.dev/api/v1/ip              # Versioned plaintext IP
-  curl https://your-worker.workers.dev/api/v1/info            # Terminal formatted diagnostic overview
-  curl -H "Accept: application/json" https://your-worker.workers.dev/api/v1/info  # Full JSON intelligence
-  curl https://your-worker.workers.dev/api/v1/geo             # Dedicated Geo info
-  curl https://your-worker.workers.dev/api/v1/yaml            # Dedicated YAML output
+  curl https://my-ip-info.ii2d-dev.workers.dev/                       # Plaintext IP (auto-detected CLI)
+  curl https://my-ip-info.ii2d-dev.workers.dev/ip                     # Plaintext IP shorthand
+  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip              # Versioned plaintext IP
+  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/info            # Terminal formatted diagnostic overview
+  curl -H "Accept: application/json" https://my-ip-info.ii2d-dev.workers.dev/api/v1/info  # Full JSON intelligence
+  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo             # Dedicated Geo info
+  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/yaml            # Dedicated YAML output
   ```
 
 ---

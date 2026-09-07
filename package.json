@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/ii2d/my-ip-info.git"
   },
+  "homepage": "https://my-ip-info.ii2d-dev.workers.dev",
   "scripts": {
     "dev": "vite",
     "dev:worker": "wrangler dev",
