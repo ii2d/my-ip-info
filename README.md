@@ -59,11 +59,13 @@ pnpm install
 ### 2. Run Locally
 
 ```bash
-# Start Vite development server (http://localhost:5173)
+# Boot frontend (http://localhost:5173) and Cloudflare Worker (http://localhost:8787) concurrently
 pnpm dev
 
-# In another terminal, run local Cloudflare Worker (http://localhost:8787)
-pnpm dev:worker
+# Or run services individually:
+pnpm dev:client  # Vite SPA with HMR (proxies /api to :8787)
+pnpm dev:worker  # Cloudflare Worker via Wrangler / workerd
+pnpm dev:node    # Standalone Node.js server (:3000)
 ```
 
 ---
