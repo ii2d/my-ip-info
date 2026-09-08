@@ -11,7 +11,8 @@ export default defineConfig({
       manifest: {
         name: 'my-ip-info',
         short_name: 'my-ip-info',
-        description: 'Open-source multi-source IP intelligence and network connectivity diagnostic suite',
+        description:
+          'Open-source multi-source IP intelligence and network connectivity diagnostic suite',
         theme_color: '#090d16',
         background_color: '#090d16',
         display: 'standalone',
@@ -38,14 +39,7 @@ export default defineConfig({
       },
       workbox: {
         // Strict anti-stale rule: never intercept API or dynamic IP endpoints
-        navigateFallbackDenylist: [
-          /^\/api/,
-          /^\/ip/,
-          /^\/geo/,
-          /^\/yaml/,
-          /^\/json/,
-          /^\/health/,
-        ],
+        navigateFallbackDenylist: [/^\/api/, /^\/ip/, /^\/geo/, /^\/yaml/, /^\/json/, /^\/health/],
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         cleanupOutdatedCaches: true,
       },

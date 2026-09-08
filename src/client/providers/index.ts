@@ -9,7 +9,9 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://1.1.1.1/cdn-cgi/trace',
     description: 'Cloudflare direct edge trace endpoint',
     fetchIp: async () => {
-      const res = await fetch(`https://1.1.1.1/cdn-cgi/trace?t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`https://1.1.1.1/cdn-cgi/trace?t=${Date.now()}`, {
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       const ipMatch = text.match(/^ip=(.+)$/m);
@@ -30,7 +32,9 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://api.ipify.org?format=json',
     description: 'High-availability public IPv4 resolution',
     fetchIp: async () => {
-      const res = await fetch(`https://api.ipify.org?format=json&t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`https://api.ipify.org?format=json&t=${Date.now()}`, {
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
@@ -46,7 +50,9 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     endpointUrl: 'https://api64.ipify.org?format=json',
     description: 'Dual-stack public IP resolution (prefers IPv6)',
     fetchIp: async () => {
-      const res = await fetch(`https://api64.ipify.org?format=json&t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`https://api64.ipify.org?format=json&t=${Date.now()}`, {
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
