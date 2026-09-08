@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "Open-source multi-source IP intelligence and connectivity diagnostic suite",
+  "description": "Multi-source IP intelligence and connectivity diagnostic suite",
   "repository": {
     "type": "git",
     "url": "https://github.com/ii2d/my-ip-info.git"

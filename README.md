@@ -1,6 +1,6 @@
 # 🌐 my-ip-info
 
-> An open-source, high-performance IP intelligence and network connectivity diagnostic suite built as a unified Cloudflare Worker with Static Assets.
+> A high-performance IP intelligence and network connectivity diagnostic suite built as a unified Cloudflare Worker with Static Assets.
 >
 > 🚀 **Live Deployment**: [https://my-ip-info.ii2d-dev.workers.dev](https://my-ip-info.ii2d-dev.workers.dev)
 

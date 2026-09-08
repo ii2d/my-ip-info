@@ -11,8 +11,7 @@ export default defineConfig({
       manifest: {
         name: 'my-ip-info',
         short_name: 'my-ip-info',
-        description:
-          'Open-source multi-source IP intelligence and network connectivity diagnostic suite',
+        description: 'Multi-source IP intelligence and network connectivity diagnostic suite',
         theme_color: '#090d16',
         background_color: '#090d16',
         display: 'standalone',

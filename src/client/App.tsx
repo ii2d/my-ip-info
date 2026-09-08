@@ -156,8 +156,6 @@ export const App: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span>Open Source Project</span>
-          <span>•</span>
           <span>Powered by Cloudflare Workers & Cloudflare Pages</span>
         </div>
 
