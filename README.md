@@ -2,7 +2,9 @@
 
 > A high-performance IP intelligence and network connectivity diagnostic suite built as a unified Cloudflare Worker with Static Assets.
 >
-> 🚀 **Live Deployment**: [https://my-ip-info.ii2d-dev.workers.dev](https://my-ip-info.ii2d-dev.workers.dev)
+> 🚀 **Live Deployments**:
+> - **Edge Worker**: [https://my-ip-info.ii2d-dev.workers.dev](https://my-ip-info.ii2d-dev.workers.dev)
+> - **GitHub Pages**: [https://ii2d.github.io/my-ip-info/](https://ii2d.github.io/my-ip-info/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 

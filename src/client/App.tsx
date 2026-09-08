@@ -31,13 +31,22 @@ export const App: React.FC = () => {
 
   // Load serverless endpoints configuration (fallback to Vite env vars)
   const [cloudConfig, setCloudConfig] = useState(() => {
+    const envBackendUrl = (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() || '';
     const defaults = {
-      cloudflareUrl: '',
+      cloudflareUrl: envBackendUrl,
     };
     if (typeof window === 'undefined') return defaults;
     try {
       const saved = localStorage.getItem(STORAGE_CONFIG);
-      return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaults,
+          ...parsed,
+          cloudflareUrl: parsed.cloudflareUrl?.trim() || defaults.cloudflareUrl,
+        };
+      }
+      return defaults;
     } catch {
       return defaults;
     }

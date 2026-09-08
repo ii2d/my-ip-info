@@ -3,7 +3,10 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import packageJson from './package.json';
 
+const basePath = process.env.VITE_BASE_PATH || '/';
+
 export default defineConfig({
+  base: basePath,
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
@@ -20,7 +23,8 @@ export default defineConfig({
         background_color: '#090d16',
         display: 'standalone',
         orientation: 'any',
-        start_url: '/',
+        start_url: basePath,
+        scope: basePath,
         icons: [
           {
             src: '/pwa-192x192.png',
