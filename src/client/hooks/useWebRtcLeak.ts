@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { isBogonIp } from '../../shared/ip';
 import type { WebRtcLeakResult } from '../types';
+
+const REFOCUS_COOLDOWN_MS = 5000;
 
 export function useWebRtcLeak() {
   const [result, setResult] = useState<WebRtcLeakResult>({
@@ -10,6 +12,11 @@ export function useWebRtcLeak() {
     hasLeak: false,
     candidates: [],
   });
+
+  const lastProbeTimeRef = useRef<number>(0);
+  const isProbingRef = useRef<boolean>(false);
+  const pcRef = useRef<RTCPeerConnection | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const probe = useCallback(() => {
     if (typeof window === 'undefined' || !window.RTCPeerConnection) {
@@ -23,6 +30,22 @@ export function useWebRtcLeak() {
       return;
     }
 
+    // Clean up any ongoing peer connection and timeout
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (pcRef.current) {
+      try {
+        pcRef.current.close();
+      } catch {
+        // ignore
+      }
+      pcRef.current = null;
+    }
+
+    isProbingRef.current = true;
+    lastProbeTimeRef.current = Date.now();
     setResult((prev) => ({ ...prev, status: 'probing' }));
 
     const localIpsSet = new Set<string>();
@@ -35,20 +58,26 @@ export function useWebRtcLeak() {
         { urls: 'stun:stun1.l.google.com:19302' },
       ],
     });
+    pcRef.current = pc;
 
     // Dummy data channel to force ICE candidate gathering
     pc.createDataChannel('leak-detector');
 
+    const finishGathering = () => {
+      isProbingRef.current = false;
+      setResult({
+        status: 'completed',
+        localIps: Array.from(localIpsSet),
+        publicIps: Array.from(publicIpsSet),
+        hasLeak: publicIpsSet.size > 0 || localIpsSet.size > 0,
+        candidates: candidatesList,
+      });
+    };
+
     pc.onicecandidate = (event) => {
       if (!event || !event.candidate) {
         // Gathering finished
-        setResult({
-          status: 'completed',
-          localIps: Array.from(localIpsSet),
-          publicIps: Array.from(publicIpsSet),
-          hasLeak: publicIpsSet.size > 0 || localIpsSet.size > 0,
-          candidates: candidatesList,
-        });
+        finishGathering();
         return;
       }
 
@@ -76,29 +105,61 @@ export function useWebRtcLeak() {
       .then((offer) => pc.setLocalDescription(offer))
       .catch((err) => {
         console.warn('WebRTC probe offer error:', err);
+        isProbingRef.current = false;
       });
 
     // Cleanup timeout after 5 seconds
-    const timer = setTimeout(() => {
-      pc.close();
-      setResult((prev) => ({
-        ...prev,
-        status: 'completed',
-        localIps: Array.from(localIpsSet),
-        publicIps: Array.from(publicIpsSet),
-        hasLeak: publicIpsSet.size > 0 || localIpsSet.size > 0,
-        candidates: candidatesList,
-      }));
+    timerRef.current = setTimeout(() => {
+      try {
+        pc.close();
+      } catch {
+        // ignore
+      }
+      if (pcRef.current === pc) {
+        pcRef.current = null;
+      }
+      finishGathering();
     }, 5000);
-
-    return () => {
-      clearTimeout(timer);
-      pc.close();
-    };
   }, []);
 
   useEffect(() => {
     probe();
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (pcRef.current) {
+        try {
+          pcRef.current.close();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, [probe]);
+
+  // Auto-reprobe on page refocus, visibility change, or network reconnect
+  useEffect(() => {
+    const handleRefocus = () => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        return;
+      }
+      if (isProbingRef.current) {
+        return;
+      }
+      if (Date.now() - lastProbeTimeRef.current < REFOCUS_COOLDOWN_MS) {
+        return;
+      }
+      probe();
+    };
+
+    window.addEventListener('focus', handleRefocus);
+    document.addEventListener('visibilitychange', handleRefocus);
+    window.addEventListener('online', handleRefocus);
+
+    return () => {
+      window.removeEventListener('focus', handleRefocus);
+      document.removeEventListener('visibilitychange', handleRefocus);
+      window.removeEventListener('online', handleRefocus);
+    };
   }, [probe]);
 
   return {

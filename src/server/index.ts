@@ -27,6 +27,8 @@ export default {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'X-Client-IP': clientIp,
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+          Pragma: 'no-cache',
         },
       });
     }
@@ -38,6 +40,8 @@ export default {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'X-Client-IP': clientIp,
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+          Pragma: 'no-cache',
         },
       });
     }

@@ -26,6 +26,13 @@ export function createIpApp(options: CreateAppOptions = {}) {
     })
   );
 
+  // Enforce zero-caching on all IP and network diagnostic endpoints
+  app.use('*', async (c, next) => {
+    await next();
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    c.header('Pragma', 'no-cache');
+  });
+
   const buildIpResponse = (
     clientIp: string,
     reqHeaders: Headers,
