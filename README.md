@@ -17,6 +17,7 @@ Most IP lookup tools query a single remote server. **my-ip-info** cross-validate
 - 🗺️ **Geolocation Convergence Map**: Interactive dark Leaflet map plotting coordinates reported by each provider to visualize database discrepancies.
 - 🛡️ **WebRTC & STUN Leak Inspector**: Queries browser STUN ICE candidates to expose local network interfaces (LAN) and detect VPN/proxy bypasses.
 - ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to global Anycast edge nodes.
+- 📱 **Progressive Web App (PWA)**: Installable directly from the browser on desktop and mobile with standalone window support, offline UI shell caching, and automatic refetching on network reconnect.
 - 💻 **CLI & cURL Friendly**: Direct terminal support at root `/` and versioned `/api/v1` routes:
   ```bash
   curl https://my-ip-info.ii2d-dev.workers.dev/                       # Plaintext IP (auto-detected CLI)
@@ -27,6 +28,24 @@ Most IP lookup tools query a single remote server. **my-ip-info** cross-validate
   curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo             # Dedicated Geo info
   curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/yaml            # Dedicated YAML output
   ```
+
+---
+
+## 📱 Progressive Web App (PWA)
+
+**my-ip-info** can be installed directly as a standalone desktop or mobile application without needing third-party app stores.
+
+### Why Use the PWA?
+- **Zero App Store Friction**: Install immediately without having to search, download, or authenticate through the Apple App Store or Google Play Store.
+- **Cross-Platform Consistency**: Provides a unified, native app experience across macOS, Windows, Linux, iOS, and Android from a single shared web standard.
+- **Fast App Launch & Offline Shell**: Static app shell assets (HTML, CSS, JS, fonts, and icons) are pre-cached locally using Workbox Service Workers, delivering near-instant loading even on slow or intermittent network connections.
+- **Always-Fresh Network Diagnostics**: Specifically architected with strict cache-busting and API bypass rules (`navigateFallbackDenylist`) so dynamic IP and geo lookups are never served from stale caches. Real-time window focus and network reconnect listeners automatically re-probe your IP when toggling VPNs or switching Wi-Fi networks.
+
+### How to Install & Use
+- **Desktop (Chrome / Edge / Brave / Opera)**: Click the **Install** icon in the browser address bar (or navigate to menu `...` → **Install my-ip-info**). The application will launch in its own dedicated, borderless desktop window and can be pinned to your Dock or Taskbar.
+- **Desktop (Safari on macOS Sonoma+)**: Go to **File** → **Add to Dock**.
+- **Mobile (iOS Safari)**: Tap the **Share** button (box with an upward arrow) → scroll down and tap **Add to Home Screen**.
+- **Mobile (Android Chrome)**: Tap the menu `⋮` → select **Add to Home screen** or **Install app**.
 
 ---
 
