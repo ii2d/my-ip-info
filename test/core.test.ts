@@ -111,6 +111,7 @@ describe('App Routing & Versioning Tests', () => {
     const json = await res.json();
     assert.equal(json.status, 'ok');
     assert.equal(json.provider, 'test-provider');
+    assert.equal(typeof json.version, 'string');
   });
 
   it('serves plain IP on /api/v1/ip', async () => {

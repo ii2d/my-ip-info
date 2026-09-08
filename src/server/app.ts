@@ -1,5 +1,6 @@
 import { type Context, Hono } from 'hono';
 import { cors } from 'hono/cors';
+import packageJson from '../../package.json';
 import { getIpVersion, isBogonIp } from '../shared/ip';
 import type { CloudflareCfData, IpInfoResponse } from '../shared/types';
 import { extractClientIp, extractCloudflareGeo } from './extractors';
@@ -75,6 +76,7 @@ export function createIpApp(options: CreateAppOptions = {}) {
   v1.get('/health', (c: Context) => {
     return c.json({
       status: 'ok',
+      version: packageJson.version,
       provider: providerName,
       timestamp: new Date().toISOString(),
     });

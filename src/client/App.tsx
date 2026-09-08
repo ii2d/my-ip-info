@@ -157,6 +157,8 @@ export const App: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span>Powered by Cloudflare Workers & Cloudflare Pages</span>
+          <span>•</span>
+          <span>v{__APP_VERSION__}</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
