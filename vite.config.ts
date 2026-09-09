@@ -1,14 +1,25 @@
+import { execSync } from 'node:child_process';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import packageJson from './package.json';
 
+function getAppVersion(): string {
+  try {
+    const gitDesc = execSync('git describe --tags --always', { encoding: 'utf-8' }).trim();
+    return gitDesc.startsWith('v') ? gitDesc : `v${gitDesc}`;
+  } catch {
+    return `v${packageJson.version}`;
+  }
+}
+
+const appVersion = getAppVersion();
 const basePath = process.env.VITE_BASE_PATH || '/';
 
 export default defineConfig({
   base: basePath,
   define: {
-    __APP_VERSION__: JSON.stringify(packageJson.version),
+    __APP_VERSION__: JSON.stringify(appVersion),
   },
   plugins: [
     react(),
