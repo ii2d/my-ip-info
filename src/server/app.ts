@@ -107,9 +107,10 @@ export function createIpApp(options: CreateAppOptions = {}) {
     const cf = getCf(c);
     const clientIp = extractClientIp(c.req.raw.headers);
     const data = buildIpResponse(clientIp, c.req.raw.headers, cf);
-    c.header('Content-Type', 'text/yaml; charset=utf-8');
     c.header('X-Client-IP', clientIp);
-    return c.text(formatYaml(data));
+    return c.text(formatYaml(data), 200, {
+      'Content-Type': 'text/yaml; charset=utf-8',
+    });
   });
 
   // Comprehensive Info endpoint (smart format: CLI text vs JSON)
@@ -129,8 +130,9 @@ export function createIpApp(options: CreateAppOptions = {}) {
       return c.json(data);
     }
     if (formatQuery === 'yaml') {
-      c.header('Content-Type', 'text/yaml; charset=utf-8');
-      return c.text(formatYaml(data));
+      return c.text(formatYaml(data), 200, {
+        'Content-Type': 'text/yaml; charset=utf-8',
+      });
     }
     if (formatQuery === 'text' || formatQuery === 'ip' || isCliRequest(ua, accept)) {
       c.header('Content-Type', 'text/plain; charset=utf-8');

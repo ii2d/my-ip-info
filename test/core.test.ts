@@ -34,17 +34,39 @@ describe('IP Utility Tests', () => {
   });
 
   it('identifies bogon and private subnets', () => {
-    assert.equal(isBogonIp('127.0.0.1'), true);
-    assert.equal(isBogonIp('10.0.4.5'), true);
-    assert.equal(isBogonIp('192.168.1.1'), true);
-    assert.equal(isBogonIp('172.16.0.1'), true);
-    assert.equal(isBogonIp('169.254.1.1'), true);
-    assert.equal(isBogonIp('::1'), true);
+    // IPv4 Bogon & Private
+    assert.equal(isBogonIp('127.0.0.1'), true); // Loopback
+    assert.equal(isBogonIp('0.0.0.0'), true); // Current network
+    assert.equal(isBogonIp('10.0.4.5'), true); // Private RFC1918
+    assert.equal(isBogonIp('172.16.0.1'), true); // Private RFC1918
+    assert.equal(isBogonIp('172.31.255.254'), true); // Private RFC1918
+    assert.equal(isBogonIp('192.168.1.1'), true); // Private RFC1918
+    assert.equal(isBogonIp('169.254.1.1'), true); // Link-local
+    assert.equal(isBogonIp('100.64.0.1'), true); // CGNAT
+    assert.equal(isBogonIp('100.127.255.254'), true); // CGNAT
+    assert.equal(isBogonIp('198.18.0.1'), true); // Benchmark
+    assert.equal(isBogonIp('198.19.255.254'), true); // Benchmark
+    assert.equal(isBogonIp('192.0.2.1'), true); // TEST-NET-1
+    assert.equal(isBogonIp('198.51.100.1'), true); // TEST-NET-2
+    assert.equal(isBogonIp('203.0.113.1'), true); // TEST-NET-3
+    assert.equal(isBogonIp('224.0.0.1'), true); // Multicast
+    assert.equal(isBogonIp('240.0.0.1'), true); // Reserved
 
-    // Public IPs should not be bogon
+    // IPv6 Bogon & Private
+    assert.equal(isBogonIp('::1'), true); // Loopback
+    assert.equal(isBogonIp('::'), true); // Unspecified
+    assert.equal(isBogonIp('fc00::1'), true); // Unique Local (ULA)
+    assert.equal(isBogonIp('fd00::1'), true); // Unique Local (ULA)
+    assert.equal(isBogonIp('fe80::1'), true); // Link-local
+    assert.equal(isBogonIp('100::1'), true); // Discard prefix
+    assert.equal(isBogonIp('2001:db8::1'), true); // Documentation
+
+    // Public IPv4 & IPv6 should not be bogon
     assert.equal(isBogonIp('8.8.8.8'), false);
     assert.equal(isBogonIp('1.1.1.1'), false);
     assert.equal(isBogonIp('142.250.190.46'), false);
+    assert.equal(isBogonIp('2606:4700:4700::1111'), false);
+    assert.equal(isBogonIp('2001:4860:4860::8888'), false);
   });
 });
 
@@ -65,6 +87,22 @@ describe('Header & Extractor Tests', () => {
     assert.equal(extractClientIp(headers), '198.51.100.42');
   });
 
+  it('extracts True-Client-IP header', () => {
+    const headers = new Headers({
+      'true-client-ip': '198.51.100.88',
+      'x-forwarded-for': '10.0.0.3',
+    });
+    assert.equal(extractClientIp(headers), '198.51.100.88');
+  });
+
+  it('extracts X-Real-IP header', () => {
+    const headers = new Headers({
+      'x-real-ip': '198.51.100.77',
+      'x-forwarded-for': '10.0.0.4',
+    });
+    assert.equal(extractClientIp(headers), '198.51.100.77');
+  });
+
   it('falls back to X-Forwarded-For if cloud headers are absent', () => {
     const headers = new Headers({
       'x-forwarded-for': '198.51.100.5, 10.0.0.1',
@@ -72,12 +110,31 @@ describe('Header & Extractor Tests', () => {
     assert.equal(extractClientIp(headers), '198.51.100.5');
   });
 
-  it('extracts Cloudflare geo data correctly', () => {
+  it('cleans ports and whitespace from X-Forwarded-For', () => {
+    const headers = new Headers({
+      'x-forwarded-for': ' 198.51.100.6:8080 , 10.0.0.1:443 ',
+    });
+    assert.equal(extractClientIp(headers), '198.51.100.6');
+  });
+
+  it('handles plain object headers and array header values', () => {
+    const objHeaders = {
+      'x-forwarded-for': ['198.51.100.99', '10.0.0.1'],
+    };
+    assert.equal(extractClientIp(objHeaders), '198.51.100.99');
+  });
+
+  it('uses fallback IP when no headers match', () => {
+    assert.equal(extractClientIp({}, '198.51.100.123'), '198.51.100.123');
+    assert.equal(extractClientIp({}), '127.0.0.1');
+  });
+
+  it('extracts Cloudflare geo data correctly with number and string coords', () => {
     const geo = extractCloudflareGeo({
       city: 'Austin',
       region: 'Texas',
       country: 'US',
-      latitude: 30.2672,
+      latitude: '30.2672',
       longitude: -97.7431,
       asn: 13335,
       asOrganization: 'Cloudflare',
@@ -88,6 +145,13 @@ describe('Header & Extractor Tests', () => {
     assert.equal(geo?.country, 'US');
     assert.equal(geo?.asn, 'AS13335');
     assert.equal(geo?.colo, 'DFW');
+    assert.equal(geo?.latitude, 30.2672);
+    assert.equal(geo?.longitude, -97.7431);
+  });
+
+  it('returns undefined when cf object is empty or null', () => {
+    assert.equal(extractCloudflareGeo(undefined), undefined);
+    assert.equal(extractCloudflareGeo(null), undefined);
   });
 });
 
@@ -162,6 +226,7 @@ describe('App Routing & Versioning Tests', () => {
     const headers = { 'x-forwarded-for': '203.0.113.50' };
     const res = await app.request('/api/v1/yaml', { headers });
     assert.equal(res.status, 200);
+    assert.equal(res.headers.get('content-type')?.includes('text/yaml'), true);
     assert.match(await res.text(), /ip:\s*"203\.0\.113\.50"/);
   });
 
@@ -182,6 +247,30 @@ describe('App Routing & Versioning Tests', () => {
     assert.equal(jsonRes.status, 200);
     const jsonData = await jsonRes.json();
     assert.equal(jsonData.ip, '203.0.113.50');
+
+    // Query param ?format=yaml -> YAML
+    const yamlQueryRes = await app.request('/api/v1/info?format=yaml', { headers });
+    assert.equal(yamlQueryRes.status, 200);
+    assert.equal(yamlQueryRes.headers.get('content-type')?.includes('text/yaml'), true);
+    assert.match(await yamlQueryRes.text(), /ip:\s*"203\.0\.113\.50"/);
+
+    // Query param ?format=text -> Plaintext IP
+    const textQueryRes = await app.request('/api/v1/info?format=text', { headers });
+    assert.equal(textQueryRes.status, 200);
+    assert.equal(textQueryRes.headers.get('content-type')?.includes('text/plain'), true);
+    assert.equal(await textQueryRes.text(), '203.0.113.50\n');
+
+    // Query param ?format=ip -> Plaintext IP
+    const ipQueryRes = await app.request('/api/v1/info?format=ip', { headers });
+    assert.equal(ipQueryRes.status, 200);
+    assert.equal(await ipQueryRes.text(), '203.0.113.50\n');
+  });
+
+  it('returns fallback error when geo data is not available on /api/v1/geo', async () => {
+    const res = await app.request('/api/v1/geo');
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.error, 'No geo data available for this provider');
   });
 
   it('does not respond on root / or top-level unversioned routes', async () => {
