@@ -20,6 +20,7 @@
     "deploy": "pnpm build && wrangler deploy",
     "undeploy": "wrangler delete",
     "test": "tsx --test \"test/**/*.test.ts\"",
+    "test:coverage": "tsx --test --experimental-test-coverage \"test/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
