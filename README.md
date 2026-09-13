@@ -4,7 +4,14 @@
 >
 > 🚀 **Website**: [https://ip.ii2d.com](https://ip.ii2d.com)
 
+[![CI](https://github.com/ii2d/my-ip-info/actions/workflows/ci.yml/badge.svg)](https://github.com/ii2d/my-ip-info/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com)
+[![Hono](https://img.shields.io/badge/Hono-E36002?logo=hono&logoColor=white)](https://hono.dev)
+[![React 19](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![Biome](https://img.shields.io/badge/Linter-Biome-60a5fa?logo=biome&logoColor=white)](https://biomejs.dev)
 
 Most IP lookup tools query a single remote server. **my-ip-info** cross-validates IP data across your self-hosted **Cloudflare edge backend**, public APIs (`Cloudflare Trace`, `ipify`, `ipwho.is`, `IP.SB`, `ip.guide`, `SeeIP`, `icanhazip.com`, `IPIP.net`), and browser **WebRTC STUN candidates** to detect VPN/proxy leaks, diagnose coordinate variations across geolocation databases, and measure real-time latency.
 
