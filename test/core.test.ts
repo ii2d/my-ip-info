@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { createIpApp } from '../src/server/app';
 import { extractClientIp, extractCloudflareGeo } from '../src/server/extractors';
-import { formatPlaintext, isCliRequest } from '../src/server/formatters';
+import { formatPlaintext, formatYaml, isCliRequest } from '../src/server/formatters';
 import { cleanIpAddress, getIpVersion, isBogonIp } from '../src/shared/ip';
 
 describe('IP Utility Tests', () => {
@@ -15,13 +15,22 @@ describe('IP Utility Tests', () => {
   it('correctly detects IPv6 addresses', () => {
     assert.equal(getIpVersion('2001:4860:4860::8888'), 'IPv6');
     assert.equal(getIpVersion('::1'), 'IPv6');
+    assert.equal(getIpVersion('::'), 'IPv6');
+    assert.equal(getIpVersion('2001:db8::'), 'IPv6');
     assert.equal(getIpVersion('fe80::1ff:fe23:4567:890a'), 'IPv6');
   });
 
-  it('cleans IP address with ports or IPv4-mapped IPv6', () => {
+  it('rejects invalid non-IP strings and malformed addresses', () => {
+    assert.equal(getIpVersion('invalid:string'), 'Unknown');
+    assert.equal(getIpVersion('foo.bar.baz'), 'Unknown');
+    assert.equal(getIpVersion('256.256.256.256'), 'Unknown');
+  });
+
+  it('cleans IP address with ports or IPv4-mapped IPv6 and strips control characters', () => {
     assert.equal(cleanIpAddress('192.168.1.1:8080'), '192.168.1.1');
     assert.equal(cleanIpAddress('::ffff:192.0.2.1'), '192.0.2.1');
     assert.equal(cleanIpAddress('[2001:db8::1]:80'), '2001:db8::1');
+    assert.equal(cleanIpAddress('  1.1.1.1\r\n\t '), '1.1.1.1');
   });
 
   it('identifies bogon and private subnets', () => {
@@ -100,10 +109,32 @@ describe('Formatter Tests', () => {
     });
     assert.equal(res, '1.1.1.1\n');
   });
+
+  it('safely escapes strings containing quotes and newlines in YAML to prevent injection', () => {
+    const res = formatYaml({
+      ip: '1.1.1.1',
+      version: 'IPv4',
+      isBogon: false,
+      provider: 'test',
+      timestamp: '2026-09-05T00:00:00Z',
+      headers: {
+        userAgent: 'curl/8.1 "evil: injection\nmalicious: true',
+      },
+    });
+    assert.match(res, /userAgent:\s*"curl\/8\.1 \\"evil: injection\\nmalicious: true"/);
+  });
 });
 
 describe('App Routing & Versioning Tests', () => {
   const app = createIpApp({ providerName: 'test-provider' });
+
+  it('attaches defensive security headers to API responses', async () => {
+    const res = await app.request('/api/v1/health');
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(res.headers.get('x-frame-options'), 'DENY');
+    assert.equal(res.headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
+  });
 
   it('serves health endpoint on /api/v1/health', async () => {
     const res = await app.request('/api/v1/health');

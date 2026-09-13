@@ -1,4 +1,4 @@
-import { Code2, Heart, Shield } from 'lucide-react';
+import { Code2, Shield } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';

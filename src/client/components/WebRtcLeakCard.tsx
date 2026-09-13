@@ -52,6 +52,7 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
           )}
 
           <button
+            type="button"
             className="btn btn-ghost btn-icon"
             onClick={leakResult.reProbe}
             disabled={isProbing}

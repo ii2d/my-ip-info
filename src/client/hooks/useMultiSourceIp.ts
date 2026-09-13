@@ -61,8 +61,9 @@ export function useMultiSourceIp(providers: IpProvider[]) {
                 rawHeaders: res.rawHeaders,
               },
             }));
-          } catch (err: any) {
+          } catch (err: unknown) {
             const latencyMs = Math.round(performance.now() - startTime);
+            const errorMessage = err instanceof Error ? err.message : 'Request failed';
             setResults((prev) => ({
               ...prev,
               [provider.id]: {
@@ -71,7 +72,7 @@ export function useMultiSourceIp(providers: IpProvider[]) {
                 category: provider.category,
                 status: 'error',
                 latencyMs,
-                errorMessage: err.message || 'Request failed',
+                errorMessage,
               },
             }));
           }

@@ -32,7 +32,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
   // Convert country code to emoji flag (e.g. "US" -> 🇺🇸)
   const getCountryFlag = (code?: string) => {
-    if (!code || code.length !== 2) return '🌐';
+    if (code?.length !== 2) return '🌐';
     const codePoints = code
       .toUpperCase()
       .split('')
@@ -197,6 +197,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
             {ipv4 && !isInitialLoading && (
               <button
+                type="button"
                 className="btn btn-ghost btn-icon"
                 onClick={() => copyToClipboard(ipv4, 'ipv4')}
                 title="Copy IPv4"
@@ -274,6 +275,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
             {ipv6 && !isInitialLoading && (
               <button
+                type="button"
                 className="btn btn-ghost btn-icon"
                 onClick={() => copyToClipboard(ipv6, 'ipv6')}
                 title="Copy IPv6"
