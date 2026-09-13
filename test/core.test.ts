@@ -181,11 +181,18 @@ describe('Formatter Tests', () => {
       isBogon: false,
       provider: 'test',
       timestamp: '2026-09-05T00:00:00Z',
+      geo: {
+        city: 'Austin',
+        country: 'US',
+        latitude: 30.2672,
+      },
       headers: {
         userAgent: 'curl/8.1 "evil: injection\nmalicious: true',
       },
     });
     assert.match(res, /userAgent:\s*"curl\/8\.1 \\"evil: injection\\nmalicious: true"/);
+    assert.match(res, /city:\s*"Austin"/);
+    assert.match(res, /latitude:\s*30\.2672/);
   });
 });
 
