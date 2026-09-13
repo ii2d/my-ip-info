@@ -27,8 +27,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        name: 'my-ip-info',
-        short_name: 'my-ip-info',
+        name: 'My IP Info',
+        short_name: 'My IP Info',
         description: 'Multi-source IP intelligence and network connectivity diagnostic suite',
         theme_color: '#090d16',
         background_color: '#090d16',

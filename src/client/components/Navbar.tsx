@@ -26,7 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="brand-title">my-ip-info</span>
+            <span className="brand-title">My IP Info</span>
             <span className="brand-badge">{__APP_VERSION__}</span>
           </div>
           <p className="nav-subtitle" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
