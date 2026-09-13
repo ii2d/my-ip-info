@@ -2,21 +2,23 @@ import type { IpVersion } from './types';
 
 const IPV4_REGEX =
   /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-const IPV6_REGEX = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$|^(?:[A-F0-9]{1,4}:)*:[A-F0-9]{1,4}$/i;
+
+const IPV6_REGEX =
+  /^(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
 
 export function getIpVersion(rawIp: string): IpVersion {
   const ip = cleanIpAddress(rawIp);
   if (IPV4_REGEX.test(ip)) {
     return 'IPv4';
   }
-  if (ip.includes(':')) {
+  if (IPV6_REGEX.test(ip)) {
     return 'IPv6';
   }
   return 'Unknown';
 }
 
 export function cleanIpAddress(rawIp: string): string {
-  let ip = rawIp.trim();
+  let ip = rawIp.replace(/[\r\n\t\0]/g, '').trim();
   // Remove port if present (e.g. 192.168.1.1:12345 or [::1]:12345)
   if (ip.startsWith('[') && ip.includes(']')) {
     ip = ip.substring(1, ip.indexOf(']'));

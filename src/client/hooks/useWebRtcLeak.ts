@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { isBogonIp } from '../../shared/ip';
+import { getIpVersion, isBogonIp } from '../../shared/ip';
 import type { WebRtcLeakResult } from '../types';
 
 const REFOCUS_COOLDOWN_MS = 5000;
@@ -75,7 +75,7 @@ export function useWebRtcLeak() {
     };
 
     pc.onicecandidate = (event) => {
-      if (!event || !event.candidate) {
+      if (!event?.candidate) {
         // Gathering finished
         finishGathering();
         return;
@@ -89,7 +89,8 @@ export function useWebRtcLeak() {
         const protocol = parts[2] || 'udp';
 
         // Check if IP is valid and not mDNS obfuscated (e.g. .local)
-        if (ip && !ip.endsWith('.local') && ip.includes('.')) {
+        const version = getIpVersion(ip);
+        if (ip && !ip.endsWith('.local') && version !== 'Unknown') {
           if (isBogonIp(ip)) {
             localIpsSet.add(ip);
           } else {

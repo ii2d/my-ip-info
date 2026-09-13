@@ -1,4 +1,4 @@
-import { Check, Copy, ExternalLink, ShieldAlert, ShieldCheck, WifiOff } from 'lucide-react';
+import { Check, Copy, WifiOff } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { ProviderResult } from '../types';
@@ -284,8 +284,9 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
                       <td style={{ padding: '1rem', textAlign: 'right' }}>
                         {result.ip && (
                           <button
+                            type="button"
                             className="btn btn-ghost btn-icon"
-                            onClick={() => copyIp(result.ip!, result.providerId)}
+                            onClick={() => result.ip && copyIp(result.ip, result.providerId)}
                             title="Copy IP"
                           >
                             {isCopied ? <Check size={15} color="#34d399" /> : <Copy size={15} />}
@@ -414,8 +415,9 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
 
                     {result.ip && (
                       <button
+                        type="button"
                         className="btn btn-ghost btn-icon"
-                        onClick={() => copyIp(result.ip!, result.providerId)}
+                        onClick={() => result.ip && copyIp(result.ip, result.providerId)}
                         title="Copy IP"
                         style={{ flexShrink: 0 }}
                       >

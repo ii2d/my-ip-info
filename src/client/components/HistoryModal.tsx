@@ -11,7 +11,7 @@ interface HistoryModalProps {
   onSetEnabled: (enabled: boolean) => void;
   onClearHistory: () => void;
   onDeleteEntry: (id: string) => void;
-  onRecordCurrentSnapshot?: () => { recorded: boolean; reason: string } | void;
+  onRecordCurrentSnapshot?: () => { recorded: boolean; reason: string } | undefined;
 }
 
 export const HistoryModal: React.FC<HistoryModalProps> = ({
@@ -51,7 +51,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   };
 
   const getCountryFlag = (code?: string) => {
-    if (!code || code.length !== 2) return '🌐';
+    if (code?.length !== 2) return '🌐';
     const codePoints = code
       .toUpperCase()
       .split('')
@@ -91,36 +91,48 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
     }
   };
 
-  const handleExportJson = () => {
-    const dataStr =
-      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(history, null, 2));
+  const escapeCsvCell = (val?: string) => {
+    if (!val) return '""';
+    // Neutralize formula injection prefixes (=, +, -, @, \t, \r)
+    let safeVal = val;
+    if (/^[=+\-@\t\r]/.test(safeVal)) {
+      safeVal = `'${safeVal}`;
+    }
+    // Escape internal double quotes by doubling them
+    return `"${safeVal.replace(/"/g, '""')}"`;
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
     const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `ip-history-${Date.now()}.json`);
+    downloadAnchor.setAttribute('href', url);
+    downloadAnchor.setAttribute('download', filename);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportJson = () => {
+    const blob = new Blob([JSON.stringify(history, null, 2)], {
+      type: 'application/json;charset=utf-8',
+    });
+    downloadBlob(blob, `ip-history-${Date.now()}.json`);
   };
 
   const handleExportCsv = () => {
     const headers = ['Timestamp', 'IPv4', 'IPv6', 'Country', 'City', 'ISP'];
     const rows = history.map((entry) => [
-      `"${entry.timestamp}"`,
-      `"${entry.ipv4 || ''}"`,
-      `"${entry.ipv6 || ''}"`,
-      `"${entry.country || ''}"`,
-      `"${entry.city || ''}"`,
-      `"${entry.org || ''}"`,
+      escapeCsvCell(entry.timestamp),
+      escapeCsvCell(entry.ipv4),
+      escapeCsvCell(entry.ipv6),
+      escapeCsvCell(entry.country),
+      escapeCsvCell(entry.city),
+      escapeCsvCell(entry.org),
     ]);
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', encodeURI(csvContent));
-    downloadAnchor.setAttribute('download', `ip-history-${Date.now()}.csv`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    downloadBlob(blob, `ip-history-${Date.now()}.csv`);
   };
 
   return (

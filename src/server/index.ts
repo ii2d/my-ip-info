@@ -29,6 +29,8 @@ export default {
           'X-Client-IP': clientIp,
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
           Pragma: 'no-cache',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
         },
       });
     }
@@ -42,6 +44,8 @@ export default {
           'X-Client-IP': clientIp,
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
           Pragma: 'no-cache',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
         },
       });
     }

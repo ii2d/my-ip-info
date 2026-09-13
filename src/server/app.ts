@@ -27,11 +27,14 @@ export function createIpApp(options: CreateAppOptions = {}) {
     })
   );
 
-  // Enforce zero-caching on all IP and network diagnostic endpoints
+  // Enforce zero-caching and defensive security headers on all endpoints
   app.use('*', async (c, next) => {
     await next();
     c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     c.header('Pragma', 'no-cache');
+    c.header('X-Content-Type-Options', 'nosniff');
+    c.header('X-Frame-Options', 'DENY');
+    c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
   });
 
   const buildIpResponse = (
@@ -104,9 +107,10 @@ export function createIpApp(options: CreateAppOptions = {}) {
     const cf = getCf(c);
     const clientIp = extractClientIp(c.req.raw.headers);
     const data = buildIpResponse(clientIp, c.req.raw.headers, cf);
-    c.header('Content-Type', 'text/yaml; charset=utf-8');
     c.header('X-Client-IP', clientIp);
-    return c.text(formatYaml(data));
+    return c.text(formatYaml(data), 200, {
+      'Content-Type': 'text/yaml; charset=utf-8',
+    });
   });
 
   // Comprehensive Info endpoint (smart format: CLI text vs JSON)
@@ -126,8 +130,9 @@ export function createIpApp(options: CreateAppOptions = {}) {
       return c.json(data);
     }
     if (formatQuery === 'yaml') {
-      c.header('Content-Type', 'text/yaml; charset=utf-8');
-      return c.text(formatYaml(data));
+      return c.text(formatYaml(data), 200, {
+        'Content-Type': 'text/yaml; charset=utf-8',
+      });
     }
     if (formatQuery === 'text' || formatQuery === 'ip' || isCliRequest(ua, accept)) {
       c.header('Content-Type', 'text/plain; charset=utf-8');

@@ -68,8 +68,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   const handleSaveConfig = () => {
+    const trimmedUrl = cloudflareUrl.trim();
+    if (trimmedUrl) {
+      try {
+        const parsed = new URL(trimmedUrl);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+          return;
+        }
+      } catch {
+        return;
+      }
+    }
     onSaveConfig({
-      cloudflareUrl: cloudflareUrl.trim(),
+      cloudflareUrl: trimmedUrl,
     });
     onClose();
     onRefreshAll();
@@ -77,6 +88,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const testEndpoint = async (targetUrl: string) => {
     if (!targetUrl) return;
+    try {
+      const parsed = new URL(targetUrl);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        setTestStatus('error');
+        setTestMessage('Invalid protocol: only http:// and https:// are supported');
+        return;
+      }
+    } catch {
+      setTestStatus('error');
+      setTestMessage('Invalid URL format');
+      return;
+    }
+
     setTestStatus('testing');
     setTestMessage(null);
 
@@ -109,20 +133,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleAddEndpoint = () => {
-    if (!url.trim()) return;
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return;
+
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(trimmedUrl);
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        setTestStatus('error');
+        setTestMessage('Invalid protocol: only http:// and https:// are supported');
+        return;
+      }
+    } catch {
+      setTestStatus('error');
+      setTestMessage('Invalid URL format');
+      return;
+    }
+
     let endpointName = name.trim();
     if (!endpointName) {
-      try {
-        endpointName = new URL(url).hostname;
-      } catch {
-        endpointName = 'Custom Endpoint';
-      }
+      endpointName = parsedUrl.hostname || 'Custom Endpoint';
     }
 
     const newEndpoint: CustomEndpoint = {
       id: Date.now().toString(),
       name: endpointName,
-      url: url.trim(),
+      url: trimmedUrl,
       enabled: true,
       createdAt: new Date().toISOString(),
     };

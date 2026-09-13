@@ -8,6 +8,16 @@ interface WorldMapProps {
   results: ProviderResult[];
 }
 
+function escapeHtml(str?: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -101,17 +111,20 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
           iconAnchor: [7, 7],
         });
 
+        const locationText =
+          [pt.city, pt.country].filter(Boolean).join(', ') || 'Reported Location';
+
         const marker = L.marker(latLng, { icon });
         marker.bindPopup(`
           <div style="padding: 4px 6px; font-family: sans-serif;">
             <div style="font-weight: 700; font-size: 13px; color: #f8fafc; margin-bottom: 2px;">
-              ${pt.provider}
+              ${escapeHtml(pt.provider)}
             </div>
             <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">
-              ${[pt.city, pt.country].filter(Boolean).join(', ') || 'Reported Location'}
+              ${escapeHtml(locationText)}
             </div>
             <div style="font-family: monospace; font-size: 11px; color: #38bdf8;">
-              ${pt.ip}
+              ${escapeHtml(pt.ip)}
             </div>
             <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
               Lat: ${pt.lat.toFixed(4)}, Lng: ${pt.lng.toFixed(4)}

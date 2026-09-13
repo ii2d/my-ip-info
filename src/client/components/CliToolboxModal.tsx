@@ -6,14 +6,12 @@ interface CliToolboxModalProps {
   isOpen: boolean;
   onClose: () => void;
   cloudflareUrl?: string;
-  currentHost?: string;
 }
 
 export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
   isOpen,
   onClose,
   cloudflareUrl,
-  currentHost,
 }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -80,7 +78,7 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
             <Terminal size={18} color="var(--accent-cyan)" />
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>CLI & Developer Toolbox</h3>
           </div>
-          <button className="btn btn-ghost btn-icon" onClick={onClose}>
+          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
@@ -116,6 +114,7 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
                     {item.label}
                   </span>
                   <button
+                    type="button"
                     className="btn btn-ghost btn-icon"
                     style={{ padding: '4px' }}
                     onClick={() => copyCmd(item.cmd, item.id)}

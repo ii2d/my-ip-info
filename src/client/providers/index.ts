@@ -1,4 +1,4 @@
-import { getIpVersion, isBogonIp } from '../../shared/ip';
+import { getIpVersion } from '../../shared/ip';
 import type { CustomEndpoint, IpProvider } from '../types';
 
 export const PUBLIC_PROVIDERS: IpProvider[] = [
