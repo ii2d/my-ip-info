@@ -24,7 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="brand-icon">
           <Globe size={22} />
         </div>
-        <div>
+        <div className="brand-text">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="brand-title">My IP Info</span>
             <span className="brand-badge">{__APP_VERSION__}</span>
