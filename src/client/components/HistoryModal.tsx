@@ -11,7 +11,7 @@ interface HistoryModalProps {
   onSetEnabled: (enabled: boolean) => void;
   onClearHistory: () => void;
   onDeleteEntry: (id: string) => void;
-  onRecordCurrentSnapshot?: () => void;
+  onRecordCurrentSnapshot?: () => { recorded: boolean; reason: string } | void;
 }
 
 export const HistoryModal: React.FC<HistoryModalProps> = ({
@@ -25,8 +25,24 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   onRecordCurrentSnapshot,
 }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [snapshotFeedback, setSnapshotFeedback] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleRecordSnapshot = () => {
+    if (!onRecordCurrentSnapshot) return;
+    const res = onRecordCurrentSnapshot() as { recorded: boolean; reason: string } | undefined;
+    if (res?.recorded) {
+      setSnapshotFeedback('Snapshot saved!');
+    } else if (res?.reason === 'unchanged') {
+      setSnapshotFeedback('Already up to date');
+    } else if (res?.reason === 'no-ip') {
+      setSnapshotFeedback('IP not ready');
+    } else {
+      setSnapshotFeedback('Snapshot saved!');
+    }
+    setTimeout(() => setSnapshotFeedback(null), 2500);
+  };
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -325,10 +341,21 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                 <button
                   type="button"
                   className="btn btn-ghost"
-                  onClick={onRecordCurrentSnapshot}
-                  style={{ marginTop: '0.5rem', fontSize: '0.8125rem' }}
+                  onClick={handleRecordSnapshot}
+                  style={{
+                    marginTop: '0.5rem',
+                    fontSize: '0.8125rem',
+                    color: snapshotFeedback ? 'var(--accent-emerald, #34d399)' : undefined,
+                  }}
                 >
-                  Record Current IP Snapshot
+                  {snapshotFeedback ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Check size={14} />
+                      {snapshotFeedback}
+                    </span>
+                  ) : (
+                    'Record Current IP Snapshot'
+                  )}
                 </button>
               )}
             </div>
@@ -349,17 +376,31 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                 {onRecordCurrentSnapshot && (
                   <button
                     type="button"
-                    onClick={onRecordCurrentSnapshot}
+                    onClick={handleRecordSnapshot}
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: 'var(--accent-cyan)',
+                      color: snapshotFeedback
+                        ? 'var(--accent-emerald, #34d399)'
+                        : 'var(--accent-cyan)',
                       fontSize: '0.75rem',
                       cursor: 'pointer',
                       padding: 0,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontWeight: 500,
+                      transition: 'color 0.2s ease',
                     }}
                   >
-                    + Record Snapshot Now
+                    {snapshotFeedback ? (
+                      <>
+                        <Check size={13} />
+                        <span>{snapshotFeedback}</span>
+                      </>
+                    ) : (
+                      <span>+ Record Snapshot Now</span>
+                    )}
                   </button>
                 )}
               </div>

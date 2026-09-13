@@ -105,12 +105,12 @@ export const App: React.FC = () => {
 
   const leakResult = useWebRtcLeak();
 
-  // Automatically record snapshot when primary IP or Geo is detected
+  // Automatically record snapshot when primary IP or Geo is detected and queries are complete
   useEffect(() => {
-    if (!isInitialLoading && (primaryIpv4 || primaryIpv6)) {
+    if (!isInitialLoading && !isRefreshing && (primaryIpv4 || primaryIpv6)) {
       recordSnapshot(primaryIpv4, primaryIpv6, primaryGeo);
     }
-  }, [primaryIpv4, primaryIpv6, primaryGeo, isInitialLoading, recordSnapshot]);
+  }, [primaryIpv4, primaryIpv6, primaryGeo, isInitialLoading, isRefreshing, recordSnapshot]);
 
   const handleSaveEndpoints = (updated: CustomEndpoint[]) => {
     setCustomEndpoints(updated);
@@ -216,7 +216,7 @@ export const App: React.FC = () => {
         onSetEnabled={setHistoryEnabled}
         onClearHistory={clearHistory}
         onDeleteEntry={deleteHistoryEntry}
-        onRecordCurrentSnapshot={() => recordSnapshot(primaryIpv4, primaryIpv6, primaryGeo)}
+        onRecordCurrentSnapshot={() => recordSnapshot(primaryIpv4, primaryIpv6, primaryGeo, true)}
       />
 
       {/* Footer */}
