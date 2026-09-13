@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { GeoLocationInfo } from '../../shared/types';
 import type { IpHistoryEntry } from '../types';
 

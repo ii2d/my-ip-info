@@ -1,6 +1,6 @@
 import { Code2, Heart, Shield } from 'lucide-react';
 import type React from 'react';
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
 import { HeroCard } from './components/HeroCard';

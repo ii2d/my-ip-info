@@ -1,4 +1,4 @@
-import { Clock, Copy, Download, History, Shield, Trash2, X, Check } from 'lucide-react';
+import { Check, Clock, Copy, Download, History, Shield, Trash2, X } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { IpHistoryEntry } from '../types';
@@ -435,7 +435,9 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                             </span>
                             <button
                               type="button"
-                              onClick={() => copyToClipboard(entry.ipv4!, `ipv4-${entry.id}`)}
+                              onClick={() =>
+                                entry.ipv4 && copyToClipboard(entry.ipv4, `ipv4-${entry.id}`)
+                              }
                               title="Copy IPv4"
                               style={{
                                 background: 'none',
@@ -482,7 +484,9 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                             </span>
                             <button
                               type="button"
-                              onClick={() => copyToClipboard(entry.ipv6!, `ipv6-${entry.id}`)}
+                              onClick={() =>
+                                entry.ipv6 && copyToClipboard(entry.ipv6, `ipv6-${entry.id}`)
+                              }
                               title="Copy IPv6"
                               style={{
                                 background: 'none',
