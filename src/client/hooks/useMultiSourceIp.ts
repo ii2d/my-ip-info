@@ -122,8 +122,8 @@ export function useMultiSourceIp(providers: IpProvider[]) {
     };
   }, [fetchAll]);
 
-  // Derived summaries
-  const resultsList = Object.values(results);
+  // Derived summaries (preserve stable provider declaration order)
+  const resultsList = providers.map((p) => results[p.id]).filter(Boolean);
   const successfulResults = resultsList.filter((r) => r.status === 'success' && r.ip);
 
   // Extract detected IPv4 and IPv6
