@@ -7,6 +7,7 @@ export function useMultiSourceIp(providers: IpProvider[]) {
   const [results, setResults] = useState<Record<string, ProviderResult>>({});
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
 
   const lastFetchTimeRef = useRef<number>(0);
   const isFetchingRef = useRef<boolean>(false);
@@ -80,6 +81,7 @@ export function useMultiSourceIp(providers: IpProvider[]) {
       isFetchingRef.current = false;
       setIsRefreshing(false);
       setIsInitialLoading(false);
+      setLastRefreshedAt(new Date());
     }
   }, [providers]);
 
@@ -142,6 +144,7 @@ export function useMultiSourceIp(providers: IpProvider[]) {
     resultsList,
     isInitialLoading,
     isRefreshing,
+    lastRefreshedAt,
     primaryIpv4,
     primaryIpv6,
     primaryGeo,

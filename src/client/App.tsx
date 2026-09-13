@@ -18,6 +18,7 @@ import type { CustomEndpoint } from './types';
 
 const STORAGE_CUSTOM_ENDPOINTS = 'my-ip-info:custom-endpoints';
 const STORAGE_CONFIG = 'my-ip-info:config';
+const STORAGE_DISABLED_PROVIDERS = 'my-ip-info:disabled-providers';
 
 export const App: React.FC = () => {
   // Load custom endpoints from localStorage
@@ -25,6 +26,17 @@ export const App: React.FC = () => {
     if (typeof window === 'undefined') return [];
     try {
       const saved = localStorage.getItem(STORAGE_CUSTOM_ENDPOINTS);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Load disabled provider IDs from localStorage
+  const [disabledProviderIds, setDisabledProviderIds] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem(STORAGE_DISABLED_PROVIDERS);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -70,18 +82,20 @@ export const App: React.FC = () => {
     deleteEntry: deleteHistoryEntry,
   } = useIpHistory();
 
-  // Combine providers list
+  // Combine providers list (filtering out user-disabled providers)
   const activeProviders = useMemo(() => {
     const selfHosted = getSelfHostedProviders(cloudConfig);
     const custom = getCustomEndpointProviders(customEndpoints);
-    return [...selfHosted, ...PUBLIC_PROVIDERS, ...custom];
-  }, [cloudConfig, customEndpoints]);
+    const all = [...selfHosted, ...PUBLIC_PROVIDERS, ...custom];
+    return all.filter((p) => !disabledProviderIds.includes(p.id));
+  }, [cloudConfig, customEndpoints, disabledProviderIds]);
 
   // Query engine hooks
   const {
     resultsList,
     isInitialLoading,
     isRefreshing,
+    lastRefreshedAt,
     primaryIpv4,
     primaryIpv6,
     primaryGeo,
@@ -116,6 +130,28 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleToggleProvider = (id: string) => {
+    setDisabledProviderIds((prev) => {
+      const isCurrentlyDisabled = prev.includes(id);
+      const next = isCurrentlyDisabled ? prev.filter((pId) => pId !== id) : [...prev, id];
+      try {
+        localStorage.setItem(STORAGE_DISABLED_PROVIDERS, JSON.stringify(next));
+      } catch (e) {
+        console.warn('Failed to save disabled providers:', e);
+      }
+      return next;
+    });
+  };
+
+  const handleEnableAllProviders = () => {
+    setDisabledProviderIds([]);
+    try {
+      localStorage.removeItem(STORAGE_DISABLED_PROVIDERS);
+    } catch (e) {
+      console.warn('Failed to reset disabled providers:', e);
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Top Navbar */}
@@ -138,6 +174,7 @@ export const App: React.FC = () => {
         avgLatency={avgLatency}
         isRefreshing={isRefreshing}
         isInitialLoading={isInitialLoading}
+        lastRefreshedAt={lastRefreshedAt}
       />
 
       {/* Multi-Source Comparison Table */}
@@ -164,6 +201,9 @@ export const App: React.FC = () => {
         config={cloudConfig}
         onSaveConfig={handleSaveConfig}
         onRefreshAll={refresh}
+        disabledProviderIds={disabledProviderIds}
+        onToggleProvider={handleToggleProvider}
+        onEnableAllProviders={handleEnableAllProviders}
       />
 
       <PrivacyModal isOpen={isPrivacyModalOpen} onClose={() => setIsPrivacyModalOpen(false)} />

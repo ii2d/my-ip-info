@@ -2,6 +2,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Cloud,
+  Globe,
   Play,
   Plus,
   Save,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { PUBLIC_PROVIDERS } from '../providers';
 import type { CustomEndpoint } from '../types';
 
 interface SettingsModalProps {
@@ -24,7 +26,10 @@ interface SettingsModalProps {
   };
   onSaveConfig: (config: { cloudflareUrl: string }) => void;
   onRefreshAll: () => void;
-  initialTab?: 'endpoints' | 'backend';
+  disabledProviderIds: string[];
+  onToggleProvider: (id: string) => void;
+  onEnableAllProviders?: () => void;
+  initialTab?: 'providers' | 'custom' | 'backend';
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -35,9 +40,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   config,
   onSaveConfig,
   onRefreshAll,
-  initialTab = 'endpoints',
+  disabledProviderIds = [],
+  onToggleProvider,
+  onEnableAllProviders,
+  initialTab = 'providers',
 }) => {
-  const [activeTab, setActiveTab] = useState<'endpoints' | 'backend'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'providers' | 'custom' | 'backend'>(initialTab);
   const [cloudflareUrl, setCloudflareUrl] = useState(config.cloudflareUrl);
 
   // Custom Endpoint Form State
@@ -141,6 +149,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const activeEndpointsCount = endpoints.filter((ep) => ep.enabled).length;
+  const activePublicCount = PUBLIC_PROVIDERS.filter(
+    (p) => !disabledProviderIds.includes(p.id)
+  ).length;
+
+  const getRegionBadgeClass = (tag?: string) => {
+    if (!tag) return 'badge-cyan';
+    if (tag.includes('China')) return 'badge-rose';
+    if (tag.includes('Asia')) return 'badge-amber';
+    if (tag.includes('Europe')) return 'badge-indigo';
+    if (tag.includes('US')) return 'badge-cyan';
+    return 'badge-emerald';
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -148,9 +168,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Settings size={18} color="var(--accent-primary)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Settings & Endpoints</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Settings & API Providers</h3>
           </div>
-          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} title="Close">
+          <button
+            type="button"
+            className="btn btn-ghost btn-icon"
+            onClick={onClose}
+            title="Close modal"
+          >
             <X size={18} />
           </button>
         </div>
@@ -159,8 +184,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="modal-tabs">
           <button
             type="button"
-            className={`modal-tab ${activeTab === 'endpoints' ? 'active' : ''}`}
-            onClick={() => setActiveTab('endpoints')}
+            className={`modal-tab ${activeTab === 'providers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('providers')}
+          >
+            <Globe size={15} />
+            <span>Public APIs</span>
+            <span
+              className="badge badge-emerald"
+              style={{ padding: '1px 6px', fontSize: '0.6875rem' }}
+            >
+              {activePublicCount}/{PUBLIC_PROVIDERS.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className={`modal-tab ${activeTab === 'custom' ? 'active' : ''}`}
+            onClick={() => setActiveTab('custom')}
           >
             <Server size={15} />
             <span>Custom APIs</span>
@@ -185,7 +225,124 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         <div className="modal-body">
-          {activeTab === 'endpoints' && (
+          {/* TAB 1: Built-in Public Providers */}
+          {activeTab === 'providers' && (
+            <>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                }}
+              >
+                <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
+                  Enable or disable individual public lookup services according to your region and
+                  preferences.
+                </p>
+                {onEnableAllProviders && disabledProviderIds.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={onEnableAllProviders}
+                    style={{ fontSize: '0.75rem', padding: '4px 8px', flexShrink: 0 }}
+                  >
+                    Enable All
+                  </button>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  maxHeight: '420px',
+                  overflowY: 'auto',
+                  paddingRight: '2px',
+                }}
+              >
+                {PUBLIC_PROVIDERS.map((provider) => {
+                  const isEnabled = !disabledProviderIds.includes(provider.id);
+                  return (
+                    <div
+                      key={provider.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 1rem',
+                        background: isEnabled ? 'rgba(10, 16, 28, 0.65)' : 'rgba(10, 16, 28, 0.3)',
+                        borderRadius: 'var(--radius-sm)',
+                        border: `1px solid ${isEnabled ? 'var(--border-subtle)' : 'rgba(255, 255, 255, 0.04)'}`,
+                        opacity: isEnabled ? 1 : 0.6,
+                        transition: 'all var(--transition-fast)',
+                      }}
+                    >
+                      <label
+                        htmlFor={`provider-toggle-${provider.id}`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          flex: 1,
+                        }}
+                      >
+                        <input
+                          id={`provider-toggle-${provider.id}`}
+                          type="checkbox"
+                          checked={isEnabled}
+                          onChange={() => onToggleProvider(provider.id)}
+                          style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                        />
+                        <div>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontWeight: 600,
+                                fontSize: '0.875rem',
+                                color: 'var(--text-primary)',
+                              }}
+                            >
+                              {provider.name}
+                            </span>
+                            {provider.regionTag && (
+                              <span
+                                className={`badge ${getRegionBadgeClass(provider.regionTag)}`}
+                                style={{ fontSize: '0.6875rem', padding: '0 6px' }}
+                              >
+                                {provider.regionTag}
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: '0.75rem',
+                              color: 'var(--text-secondary)',
+                              marginTop: '2px',
+                            }}
+                          >
+                            {provider.description}
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* TAB 2: Custom Endpoints */}
+          {activeTab === 'custom' && (
             <>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                 Add custom serverless functions, Cloudflare Workers, or external IP APIs to
@@ -359,6 +516,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </>
           )}
 
+          {/* TAB 3: Backend Worker Override */}
           {activeTab === 'backend' && (
             <>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
