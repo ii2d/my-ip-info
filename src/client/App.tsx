@@ -3,7 +3,6 @@ import type React from 'react';
 import { useMemo, useState } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
-import { CustomEndpointModal } from './components/CustomEndpointModal';
 import { HeroCard } from './components/HeroCard';
 import { Navbar } from './components/Navbar';
 import { SettingsModal } from './components/SettingsModal';
@@ -53,7 +52,6 @@ export const App: React.FC = () => {
   });
 
   // Modal states
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [isCliModalOpen, setIsCliModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
@@ -102,7 +100,6 @@ export const App: React.FC = () => {
       <Navbar
         isRefreshing={isRefreshing}
         onRefresh={refresh}
-        onOpenEndpointsModal={() => setIsCustomModalOpen(true)}
         onOpenCliModal={() => setIsCliModalOpen(true)}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         activeEndpointsCount={customEndpoints.filter((e) => e.enabled).length}
@@ -128,14 +125,6 @@ export const App: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <CustomEndpointModal
-        isOpen={isCustomModalOpen}
-        onClose={() => setIsCustomModalOpen(false)}
-        endpoints={customEndpoints}
-        onSaveEndpoints={handleSaveEndpoints}
-        onRefreshAll={refresh}
-      />
-
       <CliToolboxModal
         isOpen={isCliModalOpen}
         onClose={() => setIsCliModalOpen(false)}
@@ -145,6 +134,8 @@ export const App: React.FC = () => {
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+        endpoints={customEndpoints}
+        onSaveEndpoints={handleSaveEndpoints}
         config={cloudConfig}
         onSaveConfig={handleSaveConfig}
         onRefreshAll={refresh}
