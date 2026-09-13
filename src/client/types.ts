@@ -50,3 +50,13 @@ export interface CustomEndpoint {
   enabled: boolean;
   createdAt: string;
 }
+
+export interface IpHistoryEntry {
+  id: string;
+  timestamp: string;
+  ipv4?: string;
+  ipv6?: string;
+  country?: string;
+  city?: string;
+  org?: string;
+}

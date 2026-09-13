@@ -1,14 +1,16 @@
 import { Code2, Heart, Shield } from 'lucide-react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
 import { HeroCard } from './components/HeroCard';
+import { HistoryModal } from './components/HistoryModal';
 import { Navbar } from './components/Navbar';
 import { PrivacyModal } from './components/PrivacyModal';
 import { SettingsModal } from './components/SettingsModal';
 import { WebRtcLeakCard } from './components/WebRtcLeakCard';
 import { WorldMap } from './components/WorldMap';
+import { useIpHistory } from './hooks/useIpHistory';
 import { useMultiSourceIp } from './hooks/useMultiSourceIp';
 import { useWebRtcLeak } from './hooks/useWebRtcLeak';
 import { getCustomEndpointProviders, getSelfHostedProviders, PUBLIC_PROVIDERS } from './providers';
@@ -56,6 +58,17 @@ export const App: React.FC = () => {
   const [isCliModalOpen, setIsCliModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+
+  // IP History Hook
+  const {
+    isEnabled: isHistoryEnabled,
+    history,
+    setEnabled: setHistoryEnabled,
+    recordSnapshot,
+    clearHistory,
+    deleteEntry: deleteHistoryEntry,
+  } = useIpHistory();
 
   // Combine providers list
   const activeProviders = useMemo(() => {
@@ -77,6 +90,13 @@ export const App: React.FC = () => {
   } = useMultiSourceIp(activeProviders);
 
   const leakResult = useWebRtcLeak();
+
+  // Automatically record snapshot when primary IP or Geo is detected
+  useEffect(() => {
+    if (!isInitialLoading && (primaryIpv4 || primaryIpv6)) {
+      recordSnapshot(primaryIpv4, primaryIpv6, primaryGeo);
+    }
+  }, [primaryIpv4, primaryIpv6, primaryGeo, isInitialLoading, recordSnapshot]);
 
   const handleSaveEndpoints = (updated: CustomEndpoint[]) => {
     setCustomEndpoints(updated);
@@ -104,8 +124,10 @@ export const App: React.FC = () => {
         onRefresh={refresh}
         onOpenCliModal={() => setIsCliModalOpen(true)}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+        onOpenHistoryModal={() => setIsHistoryModalOpen(true)}
         onOpenPrivacyModal={() => setIsPrivacyModalOpen(true)}
         activeEndpointsCount={customEndpoints.filter((e) => e.enabled).length}
+        historyCount={isHistoryEnabled ? history.length : undefined}
       />
 
       {/* Hero IP Overview Card */}
@@ -145,6 +167,17 @@ export const App: React.FC = () => {
       />
 
       <PrivacyModal isOpen={isPrivacyModalOpen} onClose={() => setIsPrivacyModalOpen(false)} />
+
+      <HistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        isEnabled={isHistoryEnabled}
+        history={history}
+        onSetEnabled={setHistoryEnabled}
+        onClearHistory={clearHistory}
+        onDeleteEntry={deleteHistoryEntry}
+        onRecordCurrentSnapshot={() => recordSnapshot(primaryIpv4, primaryIpv6, primaryGeo)}
+      />
 
       {/* Footer */}
       <footer

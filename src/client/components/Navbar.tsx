@@ -1,4 +1,14 @@
-import { ExternalLink, Globe, Menu, RefreshCw, Settings, Shield, Terminal, X } from 'lucide-react';
+import {
+  ExternalLink,
+  Globe,
+  History,
+  Menu,
+  RefreshCw,
+  Settings,
+  Shield,
+  Terminal,
+  X,
+} from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 
@@ -23,8 +33,10 @@ interface NavbarProps {
   onRefresh: () => void;
   onOpenCliModal: () => void;
   onOpenSettingsModal: () => void;
+  onOpenHistoryModal: () => void;
   onOpenPrivacyModal?: () => void;
   activeEndpointsCount: number;
+  historyCount?: number;
 }
 
 const GITHUB_REPO_URL = 'https://github.com/ii2d/my-ip-info';
@@ -34,8 +46,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   onRefresh,
   onOpenCliModal,
   onOpenSettingsModal,
+  onOpenHistoryModal,
   onOpenPrivacyModal,
   activeEndpointsCount,
+  historyCount,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -96,6 +110,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                 style={{ padding: '1px 6px', fontSize: '0.6875rem' }}
               >
                 {activeEndpointsCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            className="btn btn-ghost"
+            onClick={onOpenHistoryModal}
+            title="View Local IP Connection History"
+            type="button"
+          >
+            <History size={16} />
+            <span className="nav-btn-text">History</span>
+            {historyCount !== undefined && historyCount > 0 && (
+              <span
+                className="badge badge-indigo"
+                style={{ padding: '1px 6px', fontSize: '0.6875rem' }}
+              >
+                {historyCount}
               </span>
             )}
           </button>
@@ -178,6 +210,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                       style={{ padding: '1px 6px', fontSize: '0.6875rem' }}
                     >
                       {activeEndpointsCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  className="nav-dropdown-item"
+                  role="menuitem"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onOpenHistoryModal();
+                  }}
+                >
+                  <History size={16} />
+                  <span style={{ flex: 1 }}>IP History</span>
+                  {historyCount !== undefined && historyCount > 0 && (
+                    <span
+                      className="badge badge-indigo"
+                      style={{ padding: '1px 6px', fontSize: '0.6875rem' }}
+                    >
+                      {historyCount}
                     </span>
                   )}
                 </button>
