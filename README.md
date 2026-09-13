@@ -20,16 +20,6 @@ Most IP lookup tools query a single remote server. **my-ip-info** cross-validate
 - ⚙️ **Custom Endpoints & Provider Toggles**: Enable or disable specific public providers, or register user-defined private backend endpoints in in-app settings.
 - ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to global Anycast edge nodes.
 - 📱 **Progressive Web App (PWA)**: Installable directly from the browser on desktop and mobile with standalone window support, offline UI shell caching, and automatic refetching on network reconnect.
-- 💻 **CLI & cURL Friendly**: Direct terminal support at root `/` and versioned `/api/v1` routes:
-  ```bash
-  curl https://my-ip-info.ii2d-dev.workers.dev/                       # Plaintext IP (auto-detected CLI)
-  curl https://my-ip-info.ii2d-dev.workers.dev/ip                     # Plaintext IP shorthand
-  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip              # Versioned plaintext IP
-  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/info            # Terminal formatted diagnostic overview
-  curl -H "Accept: application/json" https://my-ip-info.ii2d-dev.workers.dev/api/v1/info  # Full JSON intelligence
-  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo             # Dedicated Geo info
-  curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/yaml            # Dedicated YAML output
-  ```
 
 ---
 
