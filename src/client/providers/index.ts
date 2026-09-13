@@ -106,6 +106,83 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
       };
     },
   },
+  {
+    id: 'ipsb',
+    name: 'IP.SB (Anycast)',
+    category: 'public',
+    endpointUrl: 'https://api.ip.sb/geoip',
+    description: 'Asia-Pacific & global Anycast IP and Geo resolution',
+    fetchIp: async () => {
+      const res = await fetch(`https://api.ip.sb/geoip?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return {
+        ip: data.ip,
+        version: getIpVersion(data.ip),
+        geo: {
+          city: data.city,
+          region: data.region,
+          country: data.country,
+          countryCode: data.country_code,
+          asn: data.asn,
+          asOrganization: data.isp || data.organization,
+          latitude: data.latitude,
+          longitude: data.longitude,
+        },
+      };
+    },
+  },
+  {
+    id: 'ipguide',
+    name: 'ip.guide',
+    category: 'public',
+    endpointUrl: 'https://ip.guide/',
+    description: 'Global Anycast network and AS intelligence',
+    fetchIp: async () => {
+      const res = await fetch(`https://ip.guide/?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return {
+        ip: data.ip,
+        version: getIpVersion(data.ip),
+        geo: {
+          city: data.location?.city,
+          country: data.location?.country,
+          asn: data.network?.autonomous_system?.asn,
+          asOrganization:
+            data.network?.autonomous_system?.organization || data.network?.autonomous_system?.name,
+          latitude: data.location?.latitude,
+          longitude: data.location?.longitude,
+        },
+      };
+    },
+  },
+  {
+    id: 'seeip',
+    name: 'SeeIP',
+    category: 'public',
+    endpointUrl: 'https://api.seeip.org/geoip',
+    description: 'European & multi-region IP and geolocation resolution',
+    fetchIp: async () => {
+      const res = await fetch(`https://api.seeip.org/geoip?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return {
+        ip: data.ip,
+        version: getIpVersion(data.ip),
+        geo: {
+          city: data.city,
+          region: data.region,
+          country: data.country,
+          countryCode: data.country_code,
+          asn: data.asn,
+          asOrganization: data.organization,
+          latitude: data.latitude,
+          longitude: data.longitude,
+        },
+      };
+    },
+  },
 ];
 
 /**
