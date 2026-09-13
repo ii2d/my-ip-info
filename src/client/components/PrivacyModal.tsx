@@ -200,7 +200,9 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
                 This application does not set advertising or tracking cookies, nor does it embed
                 third-party tracking SDKs (like Google Analytics, Facebook Pixel, etc.). Your local
                 browser storage (<code className="mono">localStorage</code>) is used strictly to
-                save your custom endpoint list and optional backend overrides.
+                save your preferences, custom endpoint list, backend overrides, and opt-in local IP
+                connection history (disabled by default, stored 100% on your device, and never
+                transmitted to any server).
               </p>
             </div>
 
