@@ -62,25 +62,28 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     },
   },
   {
-    id: 'ipapi-co',
-    name: 'ipapi.co',
+    id: 'ipwhois',
+    name: 'ipwho.is',
     category: 'public',
-    endpointUrl: 'https://ipapi.co/json/',
-    description: 'Public geolocation and ASN lookup',
+    endpointUrl: 'https://ipwho.is/',
+    description: 'Free CORS-compliant geolocation and ASN lookup',
     fetchIp: async () => {
-      const res = await fetch(`https://ipapi.co/json/?t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`https://ipwho.is/?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      if (data.success === false) {
+        throw new Error(data.message || 'Lookup failed');
+      }
       return {
         ip: data.ip,
         version: getIpVersion(data.ip),
         geo: {
           city: data.city,
           region: data.region,
-          country: data.country_name,
+          country: data.country,
           countryCode: data.country_code,
-          asn: data.asn,
-          asOrganization: data.org,
+          asn: data.connection?.asn,
+          asOrganization: data.connection?.org || data.connection?.isp,
           latitude: data.latitude,
           longitude: data.longitude,
         },
