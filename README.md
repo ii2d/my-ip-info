@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Most IP lookup tools query a single remote server. **my-ip-info** cross-validates IP data across your self-hosted **Cloudflare edge backend**, public APIs (`Cloudflare Trace`, `ipify`, `ipwho.is`, `IP.SB`, `ip.guide`, `SeeIP`, `icanhazip.com`), and browser **WebRTC STUN candidates** to detect VPN/proxy leaks, diagnose coordinate variations across geolocation databases, and measure real-time latency.
+Most IP lookup tools query a single remote server. **my-ip-info** cross-validates IP data across your self-hosted **Cloudflare edge backend**, public APIs (`Cloudflare Trace`, `ipify`, `ipwho.is`, `IP.SB`, `ip.guide`, `SeeIP`, `icanhazip.com`, `IPIP.net`), and browser **WebRTC STUN candidates** to detect VPN/proxy leaks, diagnose coordinate variations across geolocation databases, and measure real-time latency.
 
 ---
 

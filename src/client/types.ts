@@ -21,6 +21,7 @@ export interface IpProvider {
   name: string;
   category: ProviderCategory;
   description?: string;
+  regionTag?: string;
   endpointUrl?: string;
   fetchIp: () => Promise<{
     ip: string;

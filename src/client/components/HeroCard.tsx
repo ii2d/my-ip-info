@@ -1,4 +1,4 @@
-import { Check, Copy, Globe, MapPin, Shield, Wifi, Zap } from 'lucide-react';
+import { Check, Clock, Copy, Globe, MapPin, Shield, Wifi, Zap } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { GeoLocationInfo } from '../../shared/types';
@@ -10,6 +10,7 @@ interface HeroCardProps {
   avgLatency?: number;
   isRefreshing: boolean;
   isInitialLoading?: boolean;
+  lastRefreshedAt?: Date | null;
 }
 
 export const HeroCard: React.FC<HeroCardProps> = ({
@@ -19,6 +20,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
   avgLatency,
   isRefreshing,
   isInitialLoading = false,
+  lastRefreshedAt,
 }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           marginBottom: '1.75rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <span className="pulse-dot" />
           <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
             {isInitialLoading ? 'Querying Network Interfaces...' : 'Network Status: Active'}
@@ -62,6 +64,21 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               style={{ fontSize: '0.6875rem', padding: '1px 7px' }}
             >
               Background Syncing...
+            </span>
+          )}
+          {lastRefreshedAt && !isInitialLoading && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+              }}
+              title={`Last checked at ${lastRefreshedAt.toLocaleString()}`}
+            >
+              <Clock size={12} />
+              <span>Last checked: {lastRefreshedAt.toLocaleTimeString()}</span>
             </span>
           )}
         </div>

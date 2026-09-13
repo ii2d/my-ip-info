@@ -6,6 +6,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'cloudflare-trace',
     name: 'Cloudflare Trace',
     category: 'public',
+    regionTag: 'Global Anycast',
     endpointUrl: 'https://1.1.1.1/cdn-cgi/trace',
     description: 'Cloudflare direct edge trace endpoint',
     fetchIp: async () => {
@@ -29,6 +30,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'ipify-v4',
     name: 'ipify (IPv4)',
     category: 'public',
+    regionTag: 'US Backbone',
     endpointUrl: 'https://api.ipify.org?format=json',
     description: 'High-availability public IPv4 resolution',
     fetchIp: async () => {
@@ -47,6 +49,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'ipify-v64',
     name: 'ipify (Universal v6/v4)',
     category: 'public',
+    regionTag: 'Global Dual-Stack',
     endpointUrl: 'https://api64.ipify.org?format=json',
     description: 'Dual-stack public IP resolution (prefers IPv6)',
     fetchIp: async () => {
@@ -65,6 +68,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'ipwhois',
     name: 'ipwho.is',
     category: 'public',
+    regionTag: 'Global Multi-Region',
     endpointUrl: 'https://ipwho.is/',
     description: 'Free CORS-compliant geolocation and ASN lookup',
     fetchIp: async () => {
@@ -94,6 +98,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'icanhazip',
     name: 'icanhazip',
     category: 'public',
+    regionTag: 'Global Anycast',
     endpointUrl: 'https://icanhazip.com',
     description: 'Cloudflare-backed plaintext IP reflection',
     fetchIp: async () => {
@@ -110,6 +115,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'ipsb',
     name: 'IP.SB (Anycast)',
     category: 'public',
+    regionTag: 'Asia-Pacific / Anycast',
     endpointUrl: 'https://api.ip.sb/geoip',
     description: 'Asia-Pacific & global Anycast IP and Geo resolution',
     fetchIp: async () => {
@@ -136,6 +142,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'ipguide',
     name: 'ip.guide',
     category: 'public',
+    regionTag: 'Global Anycast',
     endpointUrl: 'https://ip.guide/',
     description: 'Global Anycast network and AS intelligence',
     fetchIp: async () => {
@@ -161,6 +168,7 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     id: 'seeip',
     name: 'SeeIP',
     category: 'public',
+    regionTag: 'Europe / Multi-Region',
     endpointUrl: 'https://api.seeip.org/geoip',
     description: 'European & multi-region IP and geolocation resolution',
     fetchIp: async () => {
@@ -183,6 +191,40 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
       };
     },
   },
+  {
+    id: 'ipip-net',
+    name: 'IPIP.net (China)',
+    category: 'public',
+    regionTag: 'Mainland China',
+    endpointUrl: 'https://myip.ipip.net/json',
+    description: 'Premier Mainland China domestic routing and IP intelligence',
+    fetchIp: async () => {
+      // NOTE: myip.ipip.net server strips Access-Control-Allow-Origin when query parameters are present.
+      // cache: 'no-store' is sufficient to ensure fresh browser requests.
+      const res = await fetch('https://myip.ipip.net/json', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.ret !== 'ok' || !data.data?.ip) {
+        throw new Error('Invalid response from IPIP.net');
+      }
+      const loc = data.data.location || [];
+      const country = loc[0] || undefined;
+      const region = loc[1] || undefined;
+      const city = loc[2] || undefined;
+      const isp = loc[4] || undefined;
+
+      return {
+        ip: data.data.ip,
+        version: getIpVersion(data.data.ip),
+        geo: {
+          country,
+          region,
+          city,
+          asOrganization: isp,
+        },
+      };
+    },
+  },
 ];
 
 /**
@@ -197,6 +239,7 @@ export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpPr
       id: 'self-cloudflare',
       name: 'Cloudflare Worker (Edge)',
       category: 'self-hosted',
+      regionTag: 'Self-Hosted Edge',
       endpointUrl: endpointDisplay,
       description: 'Edge Worker with native CF Geo, ASN & TLS headers',
       fetchIp: async () => {
