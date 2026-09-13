@@ -1,4 +1,4 @@
-import { ExternalLink, Globe, Menu, RefreshCw, Settings, Terminal, X } from 'lucide-react';
+import { ExternalLink, Globe, Menu, RefreshCw, Settings, Shield, Terminal, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 
@@ -23,6 +23,7 @@ interface NavbarProps {
   onRefresh: () => void;
   onOpenCliModal: () => void;
   onOpenSettingsModal: () => void;
+  onOpenPrivacyModal?: () => void;
   activeEndpointsCount: number;
 }
 
@@ -33,6 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onRefresh,
   onOpenCliModal,
   onOpenSettingsModal,
+  onOpenPrivacyModal,
   activeEndpointsCount,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -179,6 +181,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </span>
                   )}
                 </button>
+
+                {onOpenPrivacyModal && (
+                  <button
+                    type="button"
+                    className="nav-dropdown-item"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onOpenPrivacyModal();
+                    }}
+                  >
+                    <Shield size={16} />
+                    <span>Privacy Policy</span>
+                  </button>
+                )}
 
                 <div className="nav-dropdown-divider" />
 

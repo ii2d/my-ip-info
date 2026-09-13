@@ -1,10 +1,11 @@
-import { Code2, Heart } from 'lucide-react';
+import { Code2, Heart, Shield } from 'lucide-react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
 import { HeroCard } from './components/HeroCard';
 import { Navbar } from './components/Navbar';
+import { PrivacyModal } from './components/PrivacyModal';
 import { SettingsModal } from './components/SettingsModal';
 import { WebRtcLeakCard } from './components/WebRtcLeakCard';
 import { WorldMap } from './components/WorldMap';
@@ -54,6 +55,7 @@ export const App: React.FC = () => {
   // Modal states
   const [isCliModalOpen, setIsCliModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   // Combine providers list
   const activeProviders = useMemo(() => {
@@ -102,6 +104,7 @@ export const App: React.FC = () => {
         onRefresh={refresh}
         onOpenCliModal={() => setIsCliModalOpen(true)}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+        onOpenPrivacyModal={() => setIsPrivacyModalOpen(true)}
         activeEndpointsCount={customEndpoints.filter((e) => e.enabled).length}
       />
 
@@ -141,6 +144,8 @@ export const App: React.FC = () => {
         onRefreshAll={refresh}
       />
 
+      <PrivacyModal isOpen={isPrivacyModalOpen} onClose={() => setIsPrivacyModalOpen(false)} />
+
       {/* Footer */}
       <footer
         style={{
@@ -162,6 +167,26 @@ export const App: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+          <button
+            type="button"
+            onClick={() => setIsPrivacyModalOpen(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: 'inherit',
+              fontFamily: 'inherit',
+            }}
+          >
+            <Shield size={15} />
+            <span>Privacy Policy</span>
+          </button>
+          <span>•</span>
           <a
             href="https://github.com/ii2d/my-ip-info"
             target="_blank"
