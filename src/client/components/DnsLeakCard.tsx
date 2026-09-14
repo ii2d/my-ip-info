@@ -86,9 +86,9 @@ export const DnsLeakCard: React.FC<DnsLeakCardProps> = ({ dnsResult }) => {
       ) : (
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
-            gap: '1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
           }}
         >
           {/* Detected Upstream DNS Resolvers */}
@@ -151,14 +151,18 @@ export const DnsLeakCard: React.FC<DnsLeakCardProps> = ({ dnsResult }) => {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         gap: '6px',
+                        minWidth: 0,
                       }}
                     >
                       <span
                         style={{
                           fontFamily: 'var(--font-mono)',
-                          fontSize: '0.875rem',
+                          fontSize: '0.8125rem',
                           color: 'var(--text-primary)',
                           fontWeight: 600,
+                          wordBreak: 'break-all',
+                          overflowWrap: 'anywhere',
+                          minWidth: 0,
                         }}
                       >
                         {server.ip}
@@ -166,7 +170,7 @@ export const DnsLeakCard: React.FC<DnsLeakCardProps> = ({ dnsResult }) => {
                       {server.country && (
                         <span
                           className="badge badge-slate"
-                          style={{ textTransform: 'uppercase', fontSize: '0.7rem' }}
+                          style={{ textTransform: 'uppercase', fontSize: '0.7rem', flexShrink: 0 }}
                         >
                           {server.country}
                         </span>
