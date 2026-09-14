@@ -22,7 +22,7 @@ Most IP lookup tools query a single remote server. **my-ip-info** cross-validate
 - ⚡ **Unified Cloudflare Worker**: Front-end (React SPA) and Edge API (Hono) deploy together under a single origin. Static assets are served via Cloudflare's edge cache (free & unlimited quota), while API requests run on the edge.
 - ⚡ **Zero-Latency Edge Intelligence**: Automatically extracts city, region, coordinates, ASN (`AS6327`), ISP organization, and airport datacenter code (`colo`) directly from the edge TLS connection without external database lookups.
 - 🗺️ **Geolocation Convergence Map**: Interactive dark Leaflet map plotting coordinates reported by each provider to visualize database discrepancies.
-- 🛡️ **Dual-Stack WebRTC & STUN Leak Inspector**: Queries browser STUN ICE candidates across both IPv4 and IPv6 to expose local network interfaces (LAN) and detect VPN/proxy bypasses.
+- 🛡️ **Dual-Stack WebRTC & DNS Leak Inspector**: Interrogates STUN ICE candidates (IPv4/IPv6) and resolves one-time nonce subdomains to uncover upstream DNS resolvers and detect VPN/proxy leaks.
 - 📜 **Local IP Connection History**: 100% on-device timeline tracking with automatic deduplication, manual snapshots, and safe CSV / JSON data export.
 - ⚙️ **Custom Endpoints & Provider Toggles**: Enable or disable specific public providers, or register user-defined private backend endpoints in in-app settings.
 - ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to global Anycast edge nodes.
