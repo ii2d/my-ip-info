@@ -44,6 +44,26 @@ export interface WebRtcLeakResult {
   }[];
 }
 
+export interface DnsServerInfo {
+  ip: string;
+  country?: string;
+  countryName?: string;
+  asn?: string;
+  org?: string;
+}
+
+export interface DnsLeakResult {
+  status: 'idle' | 'testing' | 'completed' | 'error';
+  detectedIp?: string;
+  detectedCountry?: string;
+  detectedAsn?: string;
+  detectedOrg?: string;
+  dnsServers: DnsServerInfo[];
+  conclusion?: string;
+  isLeaking: boolean;
+  errorMessage?: string;
+}
+
 export interface CustomEndpoint {
   id: string;
   name: string;

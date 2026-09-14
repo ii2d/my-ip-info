@@ -70,9 +70,9 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
       ) : (
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
-            gap: '1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
           }}
         >
           {/* Local Interface IPs (LAN) */}
@@ -98,13 +98,25 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
             {leakResult.localIps.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {leakResult.localIps.map((ip) => (
-                  <div key={ip} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="badge badge-cyan" style={{ fontSize: '0.6875rem' }}>
+                  <div
+                    key={ip}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}
+                  >
+                    <span
+                      className="badge badge-cyan"
+                      style={{ fontSize: '0.6875rem', flexShrink: 0 }}
+                    >
                       Host
                     </span>
                     <span
                       className="mono"
-                      style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}
+                      style={{
+                        fontSize: '0.8125rem',
+                        color: 'var(--text-primary)',
+                        wordBreak: 'break-all',
+                        overflowWrap: 'anywhere',
+                        minWidth: 0,
+                      }}
                     >
                       {ip}
                     </span>
@@ -145,20 +157,43 @@ export const WebRtcLeakCard: React.FC<WebRtcLeakCardProps> = ({ leakResult, prim
             {stunWanIp ? (
               <div>
                 <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '4px',
+                    minWidth: 0,
+                  }}
                 >
-                  <span className="badge badge-emerald" style={{ fontSize: '0.6875rem' }}>
+                  <span
+                    className="badge badge-emerald"
+                    style={{ fontSize: '0.6875rem', flexShrink: 0 }}
+                  >
                     srflx
                   </span>
                   <span
                     className="mono"
-                    style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}
+                    style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      wordBreak: 'break-all',
+                      overflowWrap: 'anywhere',
+                      minWidth: 0,
+                    }}
                   >
                     {stunWanIp}
                   </span>
                 </div>
                 {isVpnLeaked && (
-                  <span style={{ fontSize: '0.75rem', color: '#fb7185', display: 'block' }}>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      color: '#fb7185',
+                      display: 'block',
+                      wordBreak: 'break-word',
+                    }}
+                  >
                     ⚠️ STUN detected an IP different from your HTTP IP ({primaryIpv4})!
                   </span>
                 )}

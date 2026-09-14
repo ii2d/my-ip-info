@@ -3,6 +3,7 @@ import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
+import { DnsLeakCard } from './components/DnsLeakCard';
 import { HeroCard } from './components/HeroCard';
 import { HistoryModal } from './components/HistoryModal';
 import { Navbar } from './components/Navbar';
@@ -10,6 +11,7 @@ import { PrivacyModal } from './components/PrivacyModal';
 import { SettingsModal } from './components/SettingsModal';
 import { WebRtcLeakCard } from './components/WebRtcLeakCard';
 import { WorldMap } from './components/WorldMap';
+import { useDnsLeak } from './hooks/useDnsLeak';
 import { useIpHistory } from './hooks/useIpHistory';
 import { useMultiSourceIp } from './hooks/useMultiSourceIp';
 import { useWebRtcLeak } from './hooks/useWebRtcLeak';
@@ -104,6 +106,13 @@ export const App: React.FC = () => {
   } = useMultiSourceIp(activeProviders);
 
   const leakResult = useWebRtcLeak();
+  const dnsLeakResult = useDnsLeak(primaryGeo?.country);
+
+  const handleRefreshAll = () => {
+    refresh();
+    leakResult.reProbe();
+    dnsLeakResult.reTest();
+  };
 
   // Automatically record snapshot when primary IP or Geo is detected and queries are complete
   useEffect(() => {
@@ -148,7 +157,7 @@ export const App: React.FC = () => {
     try {
       localStorage.removeItem(STORAGE_DISABLED_PROVIDERS);
     } catch (e) {
-      console.warn('Failed to reset disabled providers:', e);
+      console.warn('Failed to clear disabled providers:', e);
     }
   };
 
@@ -157,7 +166,7 @@ export const App: React.FC = () => {
       {/* Top Navbar */}
       <Navbar
         isRefreshing={isRefreshing}
-        onRefresh={refresh}
+        onRefresh={handleRefreshAll}
         onOpenCliModal={() => setIsCliModalOpen(true)}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         onOpenHistoryModal={() => setIsHistoryModalOpen(true)}
@@ -177,14 +186,17 @@ export const App: React.FC = () => {
         lastRefreshedAt={lastRefreshedAt}
       />
 
+      {/* Security & Leak Diagnostics (WebRTC STUN & DNS Resolvers) */}
+      <div className="dashboard-grid">
+        <WebRtcLeakCard leakResult={leakResult} primaryIpv4={primaryIpv4} />
+        <DnsLeakCard dnsResult={dnsLeakResult} />
+      </div>
+
       {/* Multi-Source Comparison Table */}
       <ComparisonMatrix results={resultsList} isInitialLoading={isInitialLoading} />
 
-      {/* Grid: Interactive World Map & WebRTC STUN Leak Inspector */}
-      <div className="dashboard-grid">
-        <WorldMap results={resultsList} />
-        <WebRtcLeakCard leakResult={leakResult} primaryIpv4={primaryIpv4} />
-      </div>
+      {/* Interactive Geolocation Convergence Map */}
+      <WorldMap results={resultsList} />
 
       {/* Modals */}
       <CliToolboxModal
