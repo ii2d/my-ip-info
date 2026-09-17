@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CliToolboxModal } from './components/CliToolboxModal';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
 import { DnsLeakCard } from './components/DnsLeakCard';
+import { ErrorBanner } from './components/ErrorBanner';
 import { HeroCard } from './components/HeroCard';
 import { HistoryModal } from './components/HistoryModal';
 import { Navbar } from './components/Navbar';
@@ -18,9 +19,16 @@ import { useWebRtcLeak } from './hooks/useWebRtcLeak';
 import { getCustomEndpointProviders, getSelfHostedProviders, PUBLIC_PROVIDERS } from './providers';
 import type { CustomEndpoint } from './types';
 
+interface ExpandedSections {
+  matrix: boolean;
+  webrtc: boolean;
+  dns: boolean;
+}
+
 const STORAGE_CUSTOM_ENDPOINTS = 'my-ip-info:custom-endpoints';
 const STORAGE_CONFIG = 'my-ip-info:config';
 const STORAGE_DISABLED_PROVIDERS = 'my-ip-info:disabled-providers';
+const STORAGE_EXPANDED_SECTIONS = 'my-ip-info:expanded-sections';
 
 export const App: React.FC = () => {
   // Load custom endpoints from localStorage
@@ -92,9 +100,70 @@ export const App: React.FC = () => {
     return all.filter((p) => !disabledProviderIds.includes(p.id));
   }, [cloudConfig, customEndpoints, disabledProviderIds]);
 
+  // 3 independent collapsible diagnostics sections (default: collapsed)
+  const [expandedSections, setExpandedSections] = useState<ExpandedSections>(() => {
+    const defaults: ExpandedSections = { matrix: false, webrtc: false, dns: false };
+    if (typeof window === 'undefined') return defaults;
+    try {
+      const saved = localStorage.getItem(STORAGE_EXPANDED_SECTIONS);
+      if (saved) return { ...defaults, ...JSON.parse(saved) };
+      const oldDetails = localStorage.getItem('my-ip-info:details-expanded');
+      if (oldDetails !== null) {
+        const val = JSON.parse(oldDetails);
+        return { matrix: val, webrtc: val, dns: val };
+      }
+      return defaults;
+    } catch {
+      return defaults;
+    }
+  });
+
+  const handleToggleSection = (section: keyof ExpandedSections) => {
+    setExpandedSections((prev) => {
+      const next = { ...prev, [section]: !prev[section] };
+      try {
+        localStorage.setItem(STORAGE_EXPANDED_SECTIONS, JSON.stringify(next));
+      } catch (e) {
+        console.warn('Failed to save expanded sections:', e);
+      }
+      return next;
+    });
+  };
+
+  const handleOpenSection = (section: keyof ExpandedSections, elementId: string) => {
+    setExpandedSections((prev) => {
+      const next = { ...prev, [section]: true };
+      try {
+        localStorage.setItem(STORAGE_EXPANDED_SECTIONS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    setTimeout(() => {
+      document.getElementById(elementId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  };
+
+  const isAllExpanded = expandedSections.matrix && expandedSections.webrtc && expandedSections.dns;
+  const handleToggleAllSections = () => {
+    const nextState = !isAllExpanded;
+    const next: ExpandedSections = {
+      matrix: nextState,
+      webrtc: nextState,
+      dns: nextState,
+    };
+    setExpandedSections(next);
+    try {
+      localStorage.setItem(STORAGE_EXPANDED_SECTIONS, JSON.stringify(next));
+    } catch (e) {
+      console.warn('Failed to save expanded sections:', e);
+    }
+  };
+
   // Query engine hooks
   const {
     resultsList,
+    failedResults,
+    isAllFailed,
     isInitialLoading,
     isRefreshing,
     lastRefreshedAt,
@@ -103,10 +172,15 @@ export const App: React.FC = () => {
     primaryGeo,
     avgLatency,
     refresh,
+    retryFailed,
   } = useMultiSourceIp(activeProviders);
 
   const leakResult = useWebRtcLeak();
   const dnsLeakResult = useDnsLeak(primaryGeo?.country);
+
+  const stunWanIp = leakResult.publicIps[0];
+  const isWebRtcLeaked = Boolean(primaryIpv4 && stunWanIp && primaryIpv4 !== stunWanIp);
+  const isDnsLeaked = dnsLeakResult.isLeaking;
 
   const handleRefreshAll = () => {
     refresh();
@@ -184,19 +258,85 @@ export const App: React.FC = () => {
         isRefreshing={isRefreshing}
         isInitialLoading={isInitialLoading}
         lastRefreshedAt={lastRefreshedAt}
+        securityStatus={{
+          isWebRtcLeaked,
+          isDnsLeaked,
+          dnsServersCount: dnsLeakResult.dnsServers.length,
+          isDnsTesting: dnsLeakResult.status === 'testing',
+        }}
+        onViewDetails={() => handleOpenSection('matrix', 'comparison-matrix-card')}
+        onViewWebRtc={() => handleOpenSection('webrtc', 'webrtc-leak-card')}
+        onViewDns={() => handleOpenSection('dns', 'dns-leak-card')}
       />
 
-      {/* Security & Leak Diagnostics (WebRTC STUN & DNS Resolvers) */}
-      <div className="dashboard-grid">
-        <WebRtcLeakCard leakResult={leakResult} primaryIpv4={primaryIpv4} />
-        <DnsLeakCard dnsResult={dnsLeakResult} />
+      {/* Error & Failure Alert Banner */}
+      <ErrorBanner
+        failedResults={failedResults}
+        isAllFailed={isAllFailed}
+        isRefreshing={isRefreshing}
+        onRetryFailed={() => retryFailed()}
+        onViewDetails={() => handleOpenSection('matrix', 'comparison-matrix-card')}
+      />
+
+      {/* Interactive Geolocation Convergence Map (with Location & ISP info) */}
+      <WorldMap results={resultsList} geo={primaryGeo} isInitialLoading={isInitialLoading} />
+
+      {/* 3 Independent Collapsible Diagnostics Accordions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0.25rem 0.5rem 0',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '0.8125rem',
+              fontWeight: 700,
+              color: 'var(--text-muted)',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Diagnostics & Leak Tests
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={handleToggleAllSections}
+            style={{ fontSize: '0.75rem', padding: '2px 8px', color: 'var(--text-muted)' }}
+          >
+            {isAllExpanded ? 'Collapse All' : 'Expand All'}
+          </button>
+        </div>
+
+        {/* 1. Multi-Source Comparison Table / Grouped Consensus Grid */}
+        <ComparisonMatrix
+          results={resultsList}
+          isExpanded={expandedSections.matrix}
+          onToggleExpand={() => handleToggleSection('matrix')}
+          onRetryProvider={(id) => retryFailed([id])}
+          onRetryAllFailed={() => retryFailed()}
+          isRefreshing={isRefreshing}
+        />
+
+        {/* 2. WebRTC & STUN Leak Inspector */}
+        <WebRtcLeakCard
+          leakResult={leakResult}
+          primaryIpv4={primaryIpv4}
+          isExpanded={expandedSections.webrtc}
+          onToggleExpand={() => handleToggleSection('webrtc')}
+        />
+
+        {/* 3. DNS Resolver & Leak Inspector */}
+        <DnsLeakCard
+          dnsResult={dnsLeakResult}
+          isExpanded={expandedSections.dns}
+          onToggleExpand={() => handleToggleSection('dns')}
+        />
       </div>
-
-      {/* Multi-Source Comparison Table */}
-      <ComparisonMatrix results={resultsList} isInitialLoading={isInitialLoading} />
-
-      {/* Interactive Geolocation Convergence Map */}
-      <WorldMap results={resultsList} />
 
       {/* Modals */}
       <CliToolboxModal
