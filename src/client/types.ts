@@ -23,7 +23,7 @@ export interface IpProvider {
   description?: string;
   regionTag?: string;
   endpointUrl?: string;
-  fetchIp: () => Promise<{
+  fetchIp: (signal?: AbortSignal) => Promise<{
     ip: string;
     version?: IpVersion;
     geo?: GeoLocationInfo;

@@ -1,11 +1,14 @@
 import L from 'leaflet';
-import { Navigation } from 'lucide-react';
+import { MapPin, Navigation, Wifi } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useMemo, useRef } from 'react';
+import type { GeoLocationInfo } from '../../shared/types';
 import type { ProviderResult } from '../types';
 
 interface WorldMapProps {
   results: ProviderResult[];
+  geo?: GeoLocationInfo;
+  isInitialLoading?: boolean;
 }
 
 function escapeHtml(str?: string): string {
@@ -18,10 +21,20 @@ function escapeHtml(str?: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
+export const WorldMap: React.FC<WorldMapProps> = ({ results, geo, isInitialLoading = false }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
+
+  // Convert country code to emoji flag (e.g. "US" -> 🇺🇸)
+  const getCountryFlag = (code?: string) => {
+    if (code?.length !== 2) return '🌐';
+    const codePoints = code
+      .toUpperCase()
+      .split('')
+      .map((char) => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  };
 
   // Extract all points with valid coordinates
   const geoPoints = useMemo(() => {
@@ -149,37 +162,88 @@ export const WorldMap: React.FC<WorldMapProps> = ({ results }) => {
     };
   }, [geoPoints]);
 
+  const locationTitle = [geo?.city, geo?.region, geo?.country].filter(Boolean).join(', ');
+
   return (
-    <div className="glass-card" style={{ padding: 'clamp(1.1rem, 3vw, 1.75rem)' }}>
+    <div className="glass-card" style={{ padding: 'clamp(1.1rem, 3vw, 1.5rem)' }}>
+      {/* Geolocation & ISP Info Bar (Paired with Map) */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.25rem',
+          marginBottom: '1rem',
           flexWrap: 'wrap',
-          gap: '0.75rem',
+          gap: '0.875rem',
         }}
       >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Navigation size={18} color="var(--accent-cyan)" />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Geolocation Convergence Map</h2>
+        {/* Left: Location & Timezone */}
+        {isInitialLoading && !geo ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div
+              className="skeleton"
+              style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+            />
+            <div>
+              <div
+                className="skeleton"
+                style={{ width: '180px', height: '18px', marginBottom: '4px' }}
+              />
+              <div className="skeleton" style={{ width: '100px', height: '12px' }} />
+            </div>
           </div>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-            Visualizes where each provider and geo database resolves your coordinates.
-          </p>
-        </div>
-
-        {geoPoints.length > 0 ? (
-          <span className="badge badge-emerald">
-            {geoPoints.length} Geolocation Pin{geoPoints.length > 1 ? 's' : ''} Plotted
-          </span>
         ) : (
-          <span className="badge badge-amber">Awaiting Geolocation Data</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontSize: '1.75rem', lineHeight: 1 }}>
+              {getCountryFlag(geo?.countryCode)}
+            </span>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={16} color="var(--accent-cyan)" />
+                <h2 style={{ fontSize: '1.0625rem', fontWeight: 700, margin: 0 }}>
+                  {locationTitle || 'Resolving location...'}
+                </h2>
+              </div>
+              {geo?.timezone && (
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Timezone: {geo.timezone}
+                </span>
+              )}
+            </div>
+          </div>
         )}
+
+        {/* Right: ISP and Pins Plotted */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flexWrap: 'wrap' }}>
+          {geo?.asOrganization && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Wifi size={15} color="var(--accent-primary)" />
+              <span
+                style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                {geo.asOrganization}
+              </span>
+            </div>
+          )}
+
+          {geoPoints.length > 0 ? (
+            <span className="badge badge-emerald" style={{ fontSize: '0.75rem' }}>
+              <Navigation size={12} style={{ marginRight: '4px' }} />
+              {geoPoints.length} Convergence Pin{geoPoints.length > 1 ? 's' : ''}
+            </span>
+          ) : (
+            <span className="badge badge-amber" style={{ fontSize: '0.75rem' }}>
+              Awaiting Map Coordinates
+            </span>
+          )}
+        </div>
       </div>
 
+      {/* Leaflet Map */}
       <div ref={mapContainerRef} className="world-map-container" />
     </div>
   );

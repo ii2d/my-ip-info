@@ -71,4 +71,40 @@ describe('Provider Resolution Tests', () => {
     assert.equal(providers[1].id, 'custom-3');
     assert.equal(providers[1].name, 'Custom Endpoint');
   });
+
+  it('supports AbortSignal in provider fetchIp', async () => {
+    const originalFetch = globalThis.fetch;
+    try {
+      let passedSignal: AbortSignal | undefined;
+      globalThis.fetch = async (_url: string | URL | Request, init?: RequestInit) => {
+        passedSignal = init?.signal as AbortSignal | undefined;
+        if (passedSignal?.aborted) {
+          throw new DOMException('The operation was aborted.', 'AbortError');
+        }
+        return new Response(JSON.stringify({ ip: '1.2.3.4' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      };
+
+      const controller = new AbortController();
+      const ipify = PUBLIC_PROVIDERS.find((p) => p.id === 'ipify-v4');
+      assert.ok(ipify);
+
+      const res = await ipify.fetchIp(controller.signal);
+      assert.equal(res.ip, '1.2.3.4');
+      assert.ok(passedSignal, 'fetch must receive the AbortSignal');
+
+      // Test aborting
+      controller.abort();
+      await assert.rejects(
+        async () => {
+          await ipify.fetchIp(controller.signal);
+        },
+        { name: 'AbortError' }
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });

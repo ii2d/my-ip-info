@@ -9,8 +9,9 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Global Anycast',
     endpointUrl: 'https://1.1.1.1/cdn-cgi/trace',
     description: 'Cloudflare direct edge trace endpoint',
-    fetchIp: async () => {
+    fetchIp: async (signal?: AbortSignal) => {
       const res = await fetch(`https://1.1.1.1/cdn-cgi/trace?t=${Date.now()}`, {
+        signal,
         cache: 'no-store',
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -33,8 +34,9 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'US Backbone',
     endpointUrl: 'https://api.ipify.org?format=json',
     description: 'High-availability public IPv4 resolution',
-    fetchIp: async () => {
+    fetchIp: async (signal?: AbortSignal) => {
       const res = await fetch(`https://api.ipify.org?format=json&t=${Date.now()}`, {
+        signal,
         cache: 'no-store',
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -52,8 +54,9 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Global Dual-Stack',
     endpointUrl: 'https://api64.ipify.org?format=json',
     description: 'Dual-stack public IP resolution (prefers IPv6)',
-    fetchIp: async () => {
+    fetchIp: async (signal?: AbortSignal) => {
       const res = await fetch(`https://api64.ipify.org?format=json&t=${Date.now()}`, {
+        signal,
         cache: 'no-store',
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -71,8 +74,11 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Global Multi-Region',
     endpointUrl: 'https://ipwho.is/',
     description: 'Free CORS-compliant geolocation and ASN lookup',
-    fetchIp: async () => {
-      const res = await fetch(`https://ipwho.is/?t=${Date.now()}`, { cache: 'no-store' });
+    fetchIp: async (signal?: AbortSignal) => {
+      const res = await fetch(`https://ipwho.is/?t=${Date.now()}`, {
+        signal,
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success === false) {
@@ -101,8 +107,11 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Global Anycast',
     endpointUrl: 'https://icanhazip.com',
     description: 'Cloudflare-backed plaintext IP reflection',
-    fetchIp: async () => {
-      const res = await fetch(`https://icanhazip.com?t=${Date.now()}`, { cache: 'no-store' });
+    fetchIp: async (signal?: AbortSignal) => {
+      const res = await fetch(`https://icanhazip.com?t=${Date.now()}`, {
+        signal,
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const raw = (await res.text()).trim();
       return {
@@ -118,8 +127,11 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Asia-Pacific / Anycast',
     endpointUrl: 'https://api.ip.sb/geoip',
     description: 'Asia-Pacific & global Anycast IP and Geo resolution',
-    fetchIp: async () => {
-      const res = await fetch(`https://api.ip.sb/geoip?t=${Date.now()}`, { cache: 'no-store' });
+    fetchIp: async (signal?: AbortSignal) => {
+      const res = await fetch(`https://api.ip.sb/geoip?t=${Date.now()}`, {
+        signal,
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
@@ -145,8 +157,11 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Global Anycast',
     endpointUrl: 'https://ip.guide/',
     description: 'Global Anycast network and AS intelligence',
-    fetchIp: async () => {
-      const res = await fetch(`https://ip.guide/?t=${Date.now()}`, { cache: 'no-store' });
+    fetchIp: async (signal?: AbortSignal) => {
+      const res = await fetch(`https://ip.guide/?t=${Date.now()}`, {
+        signal,
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
@@ -171,8 +186,11 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Europe / Multi-Region',
     endpointUrl: 'https://api.seeip.org/geoip',
     description: 'European & multi-region IP and geolocation resolution',
-    fetchIp: async () => {
-      const res = await fetch(`https://api.seeip.org/geoip?t=${Date.now()}`, { cache: 'no-store' });
+    fetchIp: async (signal?: AbortSignal) => {
+      const res = await fetch(`https://api.seeip.org/geoip?t=${Date.now()}`, {
+        signal,
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       return {
@@ -198,10 +216,13 @@ export const PUBLIC_PROVIDERS: IpProvider[] = [
     regionTag: 'Mainland China',
     endpointUrl: 'https://myip.ipip.net/json',
     description: 'Premier Mainland China domestic routing and IP intelligence',
-    fetchIp: async () => {
+    fetchIp: async (signal?: AbortSignal) => {
       // NOTE: myip.ipip.net server strips Access-Control-Allow-Origin when query parameters are present.
       // cache: 'no-store' is sufficient to ensure fresh browser requests.
-      const res = await fetch('https://myip.ipip.net/json', { cache: 'no-store' });
+      const res = await fetch('https://myip.ipip.net/json', {
+        signal,
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.ret !== 'ok' || !data.data?.ip) {
@@ -242,13 +263,14 @@ export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpPr
       regionTag: 'Self-Hosted Edge',
       endpointUrl: endpointDisplay,
       description: 'Edge Worker with native CF Geo, ASN & TLS headers',
-      fetchIp: async () => {
+      fetchIp: async (signal?: AbortSignal) => {
         const urlObj = baseUrl
           ? new URL('/api/v1/info', baseUrl)
           : new URL('/api/v1/info', window.location.origin);
         urlObj.searchParams.set('t', Date.now().toString());
 
         const res = await fetch(urlObj.toString(), {
+          signal,
           cache: 'no-store',
           headers: { Accept: 'application/json' },
         });
@@ -278,7 +300,7 @@ export function getCustomEndpointProviders(customEndpoints: CustomEndpoint[]): I
       category: 'custom',
       endpointUrl: ep.url,
       description: ep.url,
-      fetchIp: async () => {
+      fetchIp: async (signal?: AbortSignal) => {
         // Try /api/v1/info first, fallback to raw endpoint
         let targetUrl = ep.url;
         if (!targetUrl.includes('/info') && !targetUrl.includes('/ip')) {
@@ -304,6 +326,7 @@ export function getCustomEndpointProviders(customEndpoints: CustomEndpoint[]): I
         }
 
         const res = await fetch(targetUrl, {
+          signal,
           cache: 'no-store',
           headers: { Accept: 'application/json' },
         });
