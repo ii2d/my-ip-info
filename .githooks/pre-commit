@@ -1,0 +1,19 @@
+#!/bin/sh
+
+echo "Running pre-commit formatting & linting (Biome via lint-staged)..."
+pnpm exec lint-staged || {
+  echo "Pre-commit Biome checks failed."
+  exit 1
+}
+
+echo "Running TypeScript typecheck..."
+pnpm run typecheck || {
+  echo "TypeScript typecheck failed."
+  exit 1
+}
+
+echo "Running unit tests..."
+pnpm run test || {
+  echo "Unit tests failed."
+  exit 1
+}
