@@ -120,7 +120,7 @@ Cloudflare Workers isolates local dev environment variables from deployed produc
 - **Local Development**: `wrangler dev` automatically reads `.env`.
 - **Production Deployment**: `wrangler deploy` does not upload `.env`. To upload your secret directly from `.env` without manual typing:
   ```bash
-  grep "^IP2_LOCATION_API_KEY=" .env | cut -d= -f2- | pnpm exec wrangler secret put IP2_LOCATION_API_KEY
+  pnpm run secret:ip2location
   ```
   Secrets can also be added via the Cloudflare Dashboard (**Workers & Pages > my-ip-info > Settings > Variables and Secrets**).
 
