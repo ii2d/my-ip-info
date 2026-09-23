@@ -114,6 +114,16 @@ pnpm deploy
 
 Wrangler will authenticate via your browser or respect your standard `CLOUDFLARE_API_TOKEN` environment variable.
 
+### Secrets & API Keys (e.g. IP2Location)
+
+Cloudflare Workers isolates local dev environment variables from deployed production secrets:
+- **Local Development**: `wrangler dev` automatically reads `.env`.
+- **Production Deployment**: `wrangler deploy` does not upload `.env`. To upload your secret directly from `.env` without manual typing:
+  ```bash
+  pnpm run secret:ip2location
+  ```
+  Secrets can also be added via the Cloudflare Dashboard (**Workers & Pages > my-ip-info > Settings > Variables and Secrets**).
+
 ### Custom Domain (Optional)
 
 To bind a custom domain in your Cloudflare zone, uncomment the route in `wrangler.toml`:
