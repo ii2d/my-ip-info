@@ -121,6 +121,19 @@ routes = [
 
 Cloudflare Workers will automatically configure the DNS record and provision SSL certificates with zero external tools needed.
 
+### GitHub Pages Deployment (Optional)
+
+The frontend can be deployed independently to GitHub Pages via [.github/workflows/pages.yml](.github/workflows/pages.yml). The build supports customizable GitHub Actions variables (set via **Settings → Secrets and variables → Actions → Variables**):
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `VITE_BACKEND_URL` / `BACKEND_URL` | Cloudflare Worker or backend API endpoint URL | `https://my-ip-info.ii2d-dev.workers.dev` |
+| `FRONTEND_DOMAIN` / `CUSTOM_DOMAIN` | Custom domain written to `CNAME` for GitHub Pages | `ip.ii2d.com` |
+| `ENABLE_IP2LOCATION` | Enable or disable IP2Location.io provider (`'true'` / `'false'`) | `true` |
+| `VITE_BASE_PATH` | Base path for GitHub Pages if not using root custom domain | `/` |
+
+Manual workflow runs via `workflow_dispatch` also provide optional inputs to override `backend_url` and `frontend_domain` on demand.
+
 ---
 
 ## 🗑️ Teardown
