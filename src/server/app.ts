@@ -166,7 +166,7 @@ export function createIpApp(options: CreateAppOptions = {}) {
       return c.json(
         {
           error:
-            'No IP2Location API key provided in environment. In production, set the secret via `wrangler secret put IP2_LOCATION_API_KEY` or Cloudflare Dashboard.',
+            'No IP2Location API key provided in environment. In production, set the secret via `pnpm secret:ip2location` or Cloudflare Dashboard.',
           configured: false,
         },
         200

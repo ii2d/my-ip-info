@@ -118,10 +118,10 @@ Wrangler will authenticate via your browser or respect your standard `CLOUDFLARE
 
 Cloudflare Workers isolates local dev environment variables from deployed production secrets:
 - **Local Development**: `wrangler dev` automatically reads `.env`.
-- **Production Deployment**: `wrangler deploy` does not upload `.env`. To upload secrets from `.env` to your remote Cloudflare Worker:
+- **Production Deployment**: `wrangler deploy` does not upload `.env`. To upload runtime secrets to your remote Cloudflare Worker:
   ```bash
-  pnpm secrets:push
-  # Or upload an individual secret interactively:
+  pnpm secret:ip2location
+  # Or explicitly:
   pnpm exec wrangler secret put IP2_LOCATION_API_KEY
   ```
   Secrets can also be added via the Cloudflare Dashboard (**Workers & Pages > my-ip-info > Settings > Variables and Secrets**).
