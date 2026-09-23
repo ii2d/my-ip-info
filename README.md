@@ -88,12 +88,17 @@ pnpm dev:node    # Standalone Node.js server (:3000)
 
 ### 3. Testing & Code Quality
 
+Native git pre-commit hooks (`.githooks/pre-commit`) automatically format and lint staged changes with Biome via `lint-staged`, run TypeScript typechecks, and execute unit tests prior to committing:
+
 ```bash
-pnpm test           # Run 34 unit tests across core, worker pipeline, and providers
+pnpm test           # Run 51 unit tests across core, worker pipeline, and providers
 pnpm test:coverage  # Run tests with V8 code coverage report
 pnpm typecheck      # Validate TypeScript types without emit
 pnpm lint           # Check code against Biome rules
+pnpm lint:fix       # Automatically apply Biome safe fixes
+pnpm format         # Format codebase with Biome
 pnpm format:check   # Verify code formatting
+pnpm pre-commit     # Run pre-commit checks on staged files (lint-staged)
 ```
 
 ---
