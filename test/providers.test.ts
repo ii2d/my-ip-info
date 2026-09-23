@@ -107,4 +107,78 @@ describe('Provider Resolution Tests', () => {
       globalThis.fetch = originalFetch;
     }
   });
+
+  it('includes IP2Location provider when VITE_ENABLE_IP2LOCATION is true', async () => {
+    const origEnv = process.env.VITE_ENABLE_IP2LOCATION;
+    const origFetch = globalThis.fetch;
+
+    try {
+      process.env.VITE_ENABLE_IP2LOCATION = 'true';
+      const providers = getSelfHostedProviders({});
+      assert.equal(providers.length, 2);
+
+      const ip2loc = providers.find((p) => p.id === 'self-ip2location');
+      assert.ok(ip2loc);
+      assert.equal(ip2loc.name, 'IP2Location.io (Self-Hosted)');
+
+      globalThis.fetch = async () => {
+        return new Response(
+          JSON.stringify({
+            ip: '1.2.3.4',
+            country_code: 'US',
+            country_name: 'United States',
+            region_name: 'California',
+            city_name: 'Los Angeles',
+            latitude: 34.05,
+            longitude: -118.25,
+            zip_code: '90001',
+            time_zone: '-07:00',
+            asn: '12345',
+            as: 'Test ASN Org',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      };
+
+      const result = await ip2loc.fetchIp();
+      assert.equal(result.ip, '1.2.3.4');
+      assert.equal(result.version, 'IPv4');
+      assert.equal(result.geo?.city, 'Los Angeles');
+      assert.equal(result.geo?.countryCode, 'US');
+      assert.equal(result.geo?.asn, 'AS12345');
+      assert.equal(result.geo?.asOrganization, 'Test ASN Org');
+    } finally {
+      process.env.VITE_ENABLE_IP2LOCATION = origEnv;
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it('rejects when IP2Location API returns configured=false', async () => {
+    const origEnv = process.env.VITE_ENABLE_IP2LOCATION;
+    const origFetch = globalThis.fetch;
+
+    try {
+      process.env.VITE_ENABLE_IP2LOCATION = 'true';
+      const providers = getSelfHostedProviders({});
+      const ip2loc = providers.find((p) => p.id === 'self-ip2location');
+      assert.ok(ip2loc);
+
+      globalThis.fetch = async () => {
+        return new Response(
+          JSON.stringify({
+            error: 'No IP2Location API key provided in environment',
+            configured: false,
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      };
+
+      await assert.rejects(async () => {
+        await ip2loc.fetchIp();
+      }, /No IP2Location API key provided in environment/);
+    } finally {
+      process.env.VITE_ENABLE_IP2LOCATION = origEnv;
+      globalThis.fetch = origFetch;
+    }
+  });
 });

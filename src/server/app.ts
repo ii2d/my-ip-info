@@ -9,6 +9,8 @@ import { formatPlaintext, formatYaml, isCliRequest } from './formatters';
 export interface CreateAppOptions {
   providerName?: string;
   defaultGeo?: (ip: string) => Promise<IpInfoResponse['geo'] | undefined>;
+  ip2LocationApiKey?: string;
+  fetchFn?: typeof fetch;
 }
 
 export function createIpApp(options: CreateAppOptions = {}) {
@@ -141,6 +143,68 @@ export function createIpApp(options: CreateAppOptions = {}) {
 
     // Default to JSON for browser and API requests
     return c.json(data);
+  });
+
+  const getIp2LocationApiKey = (c: Context): string | undefined => {
+    if (options.ip2LocationApiKey) {
+      return options.ip2LocationApiKey;
+    }
+    const env = c.env as Record<string, unknown> | undefined;
+    if (typeof env?.IP2_LOCATION_API_KEY === 'string' && env.IP2_LOCATION_API_KEY.trim()) {
+      return env.IP2_LOCATION_API_KEY.trim();
+    }
+    if (typeof process !== 'undefined' && process.env?.IP2_LOCATION_API_KEY?.trim()) {
+      return process.env.IP2_LOCATION_API_KEY.trim();
+    }
+    return undefined;
+  };
+
+  // Dedicated IP2Location.io endpoint
+  v1.get('/ip2location', async (c: Context) => {
+    const apiKey = getIp2LocationApiKey(c);
+    if (!apiKey) {
+      return c.json(
+        {
+          error: 'No IP2Location API key provided in environment',
+          configured: false,
+        },
+        200
+      );
+    }
+
+    const queryIp = c.req.query('ip')?.trim();
+    const clientIp = extractClientIp(c.req.raw.headers);
+    const targetIp = queryIp || clientIp;
+
+    c.header('X-Client-IP', targetIp);
+
+    try {
+      const url = new URL('https://api.ip2location.io/');
+      url.searchParams.set('key', apiKey);
+      url.searchParams.set('format', 'json');
+
+      if (queryIp) {
+        url.searchParams.set('ip', queryIp);
+      } else if (clientIp && clientIp !== '127.0.0.1' && clientIp !== '::1') {
+        url.searchParams.set('ip', clientIp);
+      }
+
+      const fetchImpl = options.fetchFn || fetch;
+      const response = await fetchImpl(url.toString(), {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      return c.json(
+        data,
+        (response.status >= 200 && response.status < 600 ? response.status : 200) as 200
+      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to query IP2Location';
+      return c.json({ error: message }, 502);
+    }
   });
 
   app.route('/api/v1', v1);
