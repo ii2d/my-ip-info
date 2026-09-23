@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      backend_url:
+        description: 'Backend API URL (overrides vars.VITE_BACKEND_URL)'
+        required: false
+        type: string
+      frontend_domain:
+        description: 'Frontend Domain for CNAME (overrides vars.FRONTEND_DOMAIN)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -42,12 +51,16 @@ jobs:
       - name: Build Frontend for GitHub Pages
         env:
           GITHUB_PAGES: 'true'
-          VITE_BACKEND_URL: 'https://my-ip-info.ii2d-dev.workers.dev'
+          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || '/' }}
+          VITE_BACKEND_URL: ${{ inputs.backend_url || vars.VITE_BACKEND_URL || vars.BACKEND_URL || 'https://my-ip-info.ii2d-dev.workers.dev' }}
           VITE_ENABLE_IP2LOCATION: ${{ vars.ENABLE_IP2LOCATION || 'true' }}
+          FRONTEND_DOMAIN: ${{ inputs.frontend_domain || vars.FRONTEND_DOMAIN || vars.CUSTOM_DOMAIN || 'ip.ii2d.com' }}
         run: |
           pnpm run build:pages
           cp dist/client/index.html dist/client/404.html
-          echo "ip.ii2d.com" > dist/client/CNAME
+          if [ -n "$FRONTEND_DOMAIN" ] && [ "$FRONTEND_DOMAIN" != "none" ] && [ "$FRONTEND_DOMAIN" != "false" ]; then
+            echo "$FRONTEND_DOMAIN" > dist/client/CNAME
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
