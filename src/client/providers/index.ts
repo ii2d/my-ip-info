@@ -255,7 +255,7 @@ export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpPr
   const baseUrl = config.cloudflareUrl?.trim() || '';
   const endpointDisplay = baseUrl || 'Self-Hosted Edge Worker (Same Origin)';
 
-  return [
+  const providers: IpProvider[] = [
     {
       id: 'self-cloudflare',
       name: 'Cloudflare Worker (Edge)',
@@ -264,9 +264,8 @@ export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpPr
       endpointUrl: endpointDisplay,
       description: 'Edge Worker with native CF Geo, ASN & TLS headers',
       fetchIp: async (signal?: AbortSignal) => {
-        const urlObj = baseUrl
-          ? new URL('/api/v1/info', baseUrl)
-          : new URL('/api/v1/info', window.location.origin);
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+        const urlObj = baseUrl ? new URL('/api/v1/info', baseUrl) : new URL('/api/v1/info', origin);
         urlObj.searchParams.set('t', Date.now().toString());
 
         const res = await fetch(urlObj.toString(), {
@@ -286,6 +285,87 @@ export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpPr
       },
     },
   ];
+
+  // Only include IP2Location if enabled via environment variable
+  const metaEnv =
+    typeof import.meta !== 'undefined'
+      ? (import.meta as unknown as { env?: Record<string, string> }).env
+      : undefined;
+  const isIp2LocationEnabled =
+    metaEnv?.VITE_ENABLE_IP2LOCATION === 'true' ||
+    (typeof process !== 'undefined' && process.env?.VITE_ENABLE_IP2LOCATION === 'true');
+  if (isIp2LocationEnabled) {
+    const ip2Display = baseUrl ? `${baseUrl}/api/v1/ip2location` : 'Self-Hosted IP2Location.io';
+    providers.push({
+      id: 'self-ip2location',
+      name: 'IP2Location.io (Self-Hosted)',
+      category: 'self-hosted',
+      regionTag: 'IP2Location Global',
+      endpointUrl: ip2Display,
+      description: 'Self-hosted IP intelligence powered by IP2Location.io API',
+      fetchIp: async (signal?: AbortSignal) => {
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+        const urlObj = baseUrl
+          ? new URL('/api/v1/ip2location', baseUrl)
+          : new URL('/api/v1/ip2location', origin);
+        urlObj.searchParams.set('t', Date.now().toString());
+
+        const res = await fetch(urlObj.toString(), {
+          signal,
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data.configured === false || data.error) {
+          throw new Error(data.error || 'IP2Location API is not configured');
+        }
+
+        if (!data.ip) {
+          throw new Error('No IP returned from IP2Location');
+        }
+
+        const ip = String(data.ip).trim();
+        const city = data.city_name !== '-' ? data.city_name || data.city?.name : undefined;
+        const region = data.region_name !== '-' ? data.region_name || data.region?.name : undefined;
+        const country =
+          data.country_name !== '-' ? data.country_name || data.country?.name : undefined;
+        const countryCode = data.country_code !== '-' ? data.country_code : undefined;
+        const asn =
+          data.asn !== '-' && data.asn
+            ? String(data.asn).startsWith('AS')
+              ? String(data.asn)
+              : `AS${data.asn}`
+            : undefined;
+        const asOrg =
+          data.as !== '-' && data.as ? data.as : data.isp !== '-' ? data.isp : undefined;
+        const lat = typeof data.latitude === 'number' ? data.latitude : undefined;
+        const lon = typeof data.longitude === 'number' ? data.longitude : undefined;
+        const postalCode = data.zip_code !== '-' ? data.zip_code : undefined;
+        const timezone = data.time_zone !== '-' ? data.time_zone : undefined;
+
+        return {
+          ip,
+          version: getIpVersion(ip),
+          geo: {
+            city,
+            region,
+            country,
+            countryCode,
+            latitude: lat,
+            longitude: lon,
+            postalCode,
+            timezone,
+            asn,
+            asOrganization: asOrg,
+          },
+        };
+      },
+    });
+  }
+
+  return providers;
 }
 
 /**

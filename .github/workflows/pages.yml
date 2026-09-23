@@ -43,6 +43,7 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
           VITE_BACKEND_URL: 'https://my-ip-info.ii2d-dev.workers.dev'
+          VITE_ENABLE_IP2LOCATION: ${{ vars.ENABLE_IP2LOCATION || 'true' }}
         run: |
           pnpm run build:pages
           cp dist/client/index.html dist/client/404.html

@@ -6,6 +6,7 @@ export interface Env {
   ASSETS?: {
     fetch: (request: Request) => Promise<Response>;
   };
+  IP2_LOCATION_API_KEY?: string;
 }
 
 const app = createIpApp({
