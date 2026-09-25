@@ -22,21 +22,21 @@ curl -sL https://ip.ii2d.com
 curl -sL https://ip.ii2d.com/ip
 
 # Complete JSON diagnostic payload
-curl -sL https://ip.ii2d.com/api/v1/info?format=json
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=json
 
 # YAML diagnostic payload
-curl -sL https://ip.ii2d.com/api/v1/info?format=yaml
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=yaml
 
 # Direct edge geolocation JSON
-curl -sL https://ip.ii2d.com/api/v1/geo
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo
 ```
 
 ## API Reference
 - [Root CLI / Web](https://ip.ii2d.com/): Serves interactive React SPA to browsers; serves plain-text IP to CLI tools.
 - [Plain IP Endpoint](https://ip.ii2d.com/ip): Lightweight reflection of public IP with strict no-cache headers.
-- [JSON/YAML Info Endpoint](https://ip.ii2d.com/api/v1/info): Content-negotiated diagnostic payload containing IP version, bogon check, provider name, timestamp, geolocation coordinates, and TLS metadata.
-- [Edge Geolocation Endpoint](https://ip.ii2d.com/api/v1/geo): Edge-extracted city, region, country, postal code, ASN, metro code, and colo datacenter.
-- [Health Check](https://ip.ii2d.com/api/v1/health): Service status and software version.
+- [JSON/YAML Info Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/info): Content-negotiated diagnostic payload containing IP version, bogon check, provider name, timestamp, geolocation coordinates, and TLS metadata.
+- [Edge Geolocation Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo): Edge-extracted city, region, country, postal code, ASN, metro code, and colo datacenter.
+- [Health Check](https://my-ip-info.ii2d-dev.workers.dev/api/v1/health): Service status and software version.
 
 ## Documentation & Machine-Readable Resources
 - [Detailed Technical Specification](https://ip.ii2d.com/llms-full.txt): Comprehensive API schemas, query parameters, security headers, and STUN/DNS test logic.

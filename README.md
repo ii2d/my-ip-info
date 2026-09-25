@@ -164,17 +164,17 @@ pnpm undeploy # or: npx wrangler delete
 
 ## 📡 API Reference
 
-All backend API routes are versioned under `/api/v1`:
-
+All backend API routes are versioned under `/api/v1` and served from `https://my-ip-info.ii2d-dev.workers.dev`:
+ 
 | Route | Method | Content-Type | Description |
 | :--- | :---: | :--- | :--- |
-| `/` | `GET` | `text/html` or `text/plain` | Serves React SPA to browsers; returns raw client IP to CLI tools (`curl`, `wget`) |
-| `/ip` | `GET` | `text/plain; charset=utf-8` | Shorthand endpoint returning raw public IP with defensive security headers |
-| `/api/v1/info` | `GET` | `text/plain` or `application/json` or `text/yaml` | Smart content negotiation: returns plaintext for CLI or JSON for browsers. Supports explicit query override: `?format=json`, `?format=yaml`, `?format=text`, `?format=ip` |
-| `/api/v1/ip` | `GET` | `text/plain; charset=utf-8` | Returns raw public client IP address with a trailing newline |
-| `/api/v1/geo` | `GET` | `application/json` | Geolocation data (city, region, country, lat/lon, ASN, datacenter colo) |
-| `/api/v1/yaml` | `GET` | `text/yaml; charset=utf-8` | Client metadata and network details formatted as safe YAML |
-| `/api/v1/health`| `GET` | `application/json` | Health check endpoint returning status and provider identifier |
+| `/` | `GET` | `text/html` or `text/plain` | Serves React SPA to browsers (`https://ip.ii2d.com`); returns raw client IP to CLI tools (`curl`, `wget`) |
+| `/ip` | `GET` | `text/plain; charset=utf-8` | Shorthand endpoint returning raw public IP with defensive security headers (`https://ip.ii2d.com/ip`) |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/info` | `GET` | `text/plain` or `application/json` or `text/yaml` | Smart content negotiation: returns plaintext for CLI or JSON for browsers. Supports explicit query override: `?format=json`, `?format=yaml`, `?format=text`, `?format=ip` |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip` | `GET` | `text/plain; charset=utf-8` | Returns raw public client IP address with a trailing newline |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo` | `GET` | `application/json` | Geolocation data (city, region, country, lat/lon, ASN, datacenter colo) |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/yaml` | `GET` | `text/yaml; charset=utf-8` | Client metadata and network details formatted as safe YAML |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/health`| `GET` | `application/json` | Health check endpoint returning status and provider identifier |
 | `/llms.txt` | `GET` | `text/plain; charset=utf-8` | Machine-readable context summary for LLMs, search engines, and AI agents |
 | `/llms-full.txt` | `GET` | `text/plain; charset=utf-8` | Exhaustive technical specification, API schemas, and diagnostic algorithms for AI reasoning |
 | `/sitemap.xml` | `GET` | `application/xml` | XML sitemap for search engine crawlers |

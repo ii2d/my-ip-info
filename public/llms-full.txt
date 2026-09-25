@@ -11,7 +11,8 @@ My IP Info is an edge-native, zero-dependency network diagnostic platform.
 ## 2. API Schema & Endpoints
 
 ### Base URL
-- Production: `https://ip.ii2d.com`
+- Production Web & Root CLI: `https://ip.ii2d.com`
+- Production Edge API (`/api/v1/*`): `https://my-ip-info.ii2d-dev.workers.dev`
 - Development: `http://localhost:8787` (Worker) or `http://localhost:5173` (Vite dev proxy)
 
 ### Security Headers on All Responses
@@ -40,6 +41,7 @@ Access-Control-Expose-Headers: Content-Length, X-Client-IP
 ```
 
 #### 2. Comprehensive Client Intelligence: `GET /api/v1/info`
+- **URL**: `https://my-ip-info.ii2d-dev.workers.dev/api/v1/info`
 - **Query Parameters**:
   - `format`: `json` (default), `yaml`, `text`, or `ip`
 - **Content Negotiation**: If `Accept: application/json`, returns JSON. If `Accept: text/yaml`, returns YAML. If user agent is CLI, defaults to plain text.
@@ -73,7 +75,7 @@ Access-Control-Expose-Headers: Content-Length, X-Client-IP
 ```
 
 #### 3. Plaintext/YAML Formats:
-- When requested via `?format=yaml` or `/api/v1/yaml`:
+- When requested via `?format=yaml` or `https://my-ip-info.ii2d-dev.workers.dev/api/v1/yaml`:
 ```yaml
 ip: "203.0.113.195"
 version: "IPv4"
@@ -97,9 +99,11 @@ headers:
 ```
 
 #### 4. Edge Geolocation: `GET /api/v1/geo`
+- **URL**: `https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo`
 - **Response**: The `geo` sub-object or `{ "error": "No geo data available for this provider" }`.
 
 #### 5. Health Check: `GET /api/v1/health`
+- **URL**: `https://my-ip-info.ii2d-dev.workers.dev/api/v1/health`
 - **Response**:
 ```json
 {
@@ -127,7 +131,7 @@ headers:
 
 ### C. Multi-Source IP Consensus Grouping
 - Multiple providers are fetched in parallel with individual timeouts and abort controllers:
-  - Self-Hosted Cloudflare Edge (`/api/v1/info`)
+  - Self-Hosted Cloudflare Edge (`https://my-ip-info.ii2d-dev.workers.dev/api/v1/info`)
   - Cloudflare CDN Trace (`https://1.1.1.1/cdn-cgi/trace`)
   - ipify (`https://api.ipify.org?format=json`)
   - ipwho.is (`https://ipwho.is/`)
@@ -136,7 +140,7 @@ headers:
   - SeeIP (`https://ip4.seeip.org/geoip`)
   - icanhazip.com (`https://ipv4.icanhazip.com`)
   - IPIP.net (`https://myip.ipip.net/json`)
-  - IP2Location (`/api/v1/ip2location`)
+  - IP2Location (`https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip2location`)
 - Results are clustered into consensus groups. A matching group indicates connection stability. Splintered groups indicate active split-tunneling, load-balancing, or proxy bypass.
 
 ## 4. Privacy & Zero-Retention Architecture
