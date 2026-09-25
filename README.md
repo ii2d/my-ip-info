@@ -27,6 +27,7 @@ Most IP lookup tools query a single remote server. **my-ip-info** cross-validate
 - ⚙️ **Custom Endpoints & Provider Toggles**: Enable or disable specific public providers, or register user-defined private backend endpoints in in-app settings.
 - ⏱️ **Latency & Network Benchmark**: Measures round-trip time (RTT) to global Anycast edge nodes.
 - 📱 **Progressive Web App (PWA)**: Installable directly from the browser on desktop and mobile with standalone window support, offline UI shell caching, and automatic refetching on network reconnect.
+- 🤖 **AI-Agent & SEO Ready**: Implements [`/llms.txt`](https://ip.ii2d.com/llms.txt) and [`/llms-full.txt`](https://ip.ii2d.com/llms-full.txt) machine-readable standards, high-resolution Open Graph / Twitter preview cards, Schema.org `WebApplication` & `FAQPage` JSON-LD structured data, XML sitemap (`/sitemap.xml`), and pre-rendered semantic HTML fallback for crawlers.
 
 ---
 
@@ -174,6 +175,10 @@ All backend API routes are versioned under `/api/v1`:
 | `/api/v1/geo` | `GET` | `application/json` | Geolocation data (city, region, country, lat/lon, ASN, datacenter colo) |
 | `/api/v1/yaml` | `GET` | `text/yaml; charset=utf-8` | Client metadata and network details formatted as safe YAML |
 | `/api/v1/health`| `GET` | `application/json` | Health check endpoint returning status and provider identifier |
+| `/llms.txt` | `GET` | `text/plain; charset=utf-8` | Machine-readable context summary for LLMs, search engines, and AI agents |
+| `/llms-full.txt` | `GET` | `text/plain; charset=utf-8` | Exhaustive technical specification, API schemas, and diagnostic algorithms for AI reasoning |
+| `/sitemap.xml` | `GET` | `application/xml` | XML sitemap for search engine crawlers |
+| `/robots.txt` | `GET` | `text/plain` | Crawler and AI bot access policies |
 
 ---
 

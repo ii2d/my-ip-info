@@ -25,7 +25,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: [
+        'favicon.svg',
+        'apple-touch-icon.png',
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        'og-image.png',
+      ],
       manifest: {
         name: 'My IP Info',
         short_name: 'My IP Info',
@@ -56,9 +62,19 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Strict anti-stale rule: never intercept API or dynamic IP endpoints
-        navigateFallbackDenylist: [/^\/api/, /^\/ip/, /^\/geo/, /^\/yaml/, /^\/json/, /^\/health/],
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Strict anti-stale rule: never intercept API or dynamic IP endpoints or crawler specifications
+        navigateFallbackDenylist: [
+          /^\/api/,
+          /^\/ip/,
+          /^\/geo/,
+          /^\/yaml/,
+          /^\/json/,
+          /^\/health/,
+          /^\/robots\.txt/,
+          /^\/sitemap\.xml/,
+          /^\/llms(-full)?\.txt/,
+        ],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,txt,xml}'],
         cleanupOutdatedCaches: true,
       },
     }),

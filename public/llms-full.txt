@@ -1,0 +1,145 @@
+# My IP Info — Full Technical Specification & Architecture Context
+
+> This document contains comprehensive architecture, API schema, security, and diagnostic specifications for My IP Info (https://ip.ii2d.com). It is optimized for AI assistants, automated agents, and technical evaluators.
+
+## 1. System Overview
+My IP Info is an edge-native, zero-dependency network diagnostic platform.
+- **Frontend**: React 19 Single Page Application (SPA), styled with custom CSS and Leaflet maps, compiled with Vite and VitePWA.
+- **Backend / Edge Runtime**: Cloudflare Worker running Hono, providing REST endpoints under `/api/v1/*` and edge asset serving via Cloudflare Static Assets.
+- **Deployment Model**: Unified single-origin deployment where the Cloudflare Worker intercepts API calls and proxies static assets via Cloudflare's global edge cache. Standalone Docker/Node.js support is provided via `@hono/node-server`.
+
+## 2. API Schema & Endpoints
+
+### Base URL
+- Production: `https://ip.ii2d.com`
+- Development: `http://localhost:8787` (Worker) or `http://localhost:5173` (Vite dev proxy)
+
+### Security Headers on All Responses
+Every HTTP response from the API runtime includes defensive headers to ensure freshness and prevent cross-origin framing:
+```http
+Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+Pragma: no-cache
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+Access-Control-Expose-Headers: Content-Length, X-Client-IP
+```
+
+### Endpoints
+
+#### 1. Plaintext IP Reflection: `GET /` and `GET /ip`
+- **Path**: `/` (when `User-Agent` matches CLI tools like `curl`, `wget`, `httpie`, `fetch`, `aria2`, `urllib` or `Accept: text/plain`) or explicit `/ip`
+- **Status**: `200 OK`
+- **Content-Type**: `text/plain; charset=utf-8`
+- **Headers**: `X-Client-IP: <client_ip>`
+- **Response**:
+```text
+203.0.113.195\n
+```
+
+#### 2. Comprehensive Client Intelligence: `GET /api/v1/info`
+- **Query Parameters**:
+  - `format`: `json` (default), `yaml`, `text`, or `ip`
+- **Content Negotiation**: If `Accept: application/json`, returns JSON. If `Accept: text/yaml`, returns YAML. If user agent is CLI, defaults to plain text.
+- **JSON Response Schema**:
+```json
+{
+  "ip": "203.0.113.195",
+  "version": "IPv4",
+  "isBogon": false,
+  "provider": "cloudflare-worker",
+  "timestamp": "2026-09-24T21:30:00.000Z",
+  "geo": {
+    "city": "Denver",
+    "region": "Colorado",
+    "country": "US",
+    "postalCode": "80202",
+    "latitude": 39.7392,
+    "longitude": -104.9903,
+    "asn": 13335,
+    "org": "Cloudflare, Inc.",
+    "colo": "DEN"
+  },
+  "headers": {
+    "userAgent": "curl/8.7.1",
+    "acceptLanguage": "en-US,en;q=0.9",
+    "protocol": "https",
+    "tlsVersion": "TLSv1.3",
+    "tlsCipher": "AEAD-AES256-GCM-SHA384"
+  }
+}
+```
+
+#### 3. Plaintext/YAML Formats:
+- When requested via `?format=yaml` or `/api/v1/yaml`:
+```yaml
+ip: "203.0.113.195"
+version: "IPv4"
+isBogon: false
+provider: "cloudflare-worker"
+timestamp: "2026-09-24T21:30:00.000Z"
+geo:
+  city: "Denver"
+  region: "Colorado"
+  country: "US"
+  postalCode: "80202"
+  latitude: 39.7392
+  longitude: -104.9903
+  asn: 13335
+  org: "Cloudflare, Inc."
+  colo: "DEN"
+headers:
+  protocol: "https"
+  tlsVersion: "TLSv1.3"
+  tlsCipher: "AEAD-AES256-GCM-SHA384"
+```
+
+#### 4. Edge Geolocation: `GET /api/v1/geo`
+- **Response**: The `geo` sub-object or `{ "error": "No geo data available for this provider" }`.
+
+#### 5. Health Check: `GET /api/v1/health`
+- **Response**:
+```json
+{
+  "status": "ok",
+  "version": "1.3.0",
+  "provider": "cloudflare-worker",
+  "timestamp": "2026-09-24T21:30:00.000Z"
+}
+```
+
+## 3. Client-Side Diagnostic Mechanisms
+
+### A. WebRTC STUN Leak Detection
+- **Mechanism**: The client initializes a temporary `RTCPeerConnection` configured with public Google STUN servers (`stun:stun.l.google.com:19302`, `stun:stun1.l.google.com:19302`).
+- **ICE Candidate Analysis**: The browser generates ICE candidates with type `srflx` (server reflexive) or `host`.
+- **Leak Detection**:
+  - Compares STUN-discovered candidate IP addresses against the public HTTP edge IP address.
+  - If a STUN candidate returns a different public IP address than the HTTP edge probe (or exposes an unproxied local/IPv6 address while connected to a VPN/proxy), a leak warning is triggered.
+  - Automatically filters private RFC 1918 bogons (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7`, `fe80::/10`) to distinguish internal interfaces from public leakage.
+
+### B. DNS Leak Detection
+- **Mechanism**: Generates a cryptographically random nonce subdomain against diagnostic nameservers (e.g. `bash.ws` probe network).
+- **Resolver Evaluation**: As the client resolves the nonce, the authoritative nameserver captures the recursive DNS resolver's egress IP and ASN.
+- **Leak Flagging**: If the DNS resolver's autonomous system (ASN) or geographic country diverges from the HTTP proxy/VPN exit gateway, users are notified of potential DNS leakage.
+
+### C. Multi-Source IP Consensus Grouping
+- Multiple providers are fetched in parallel with individual timeouts and abort controllers:
+  - Self-Hosted Cloudflare Edge (`/api/v1/info`)
+  - Cloudflare CDN Trace (`https://1.1.1.1/cdn-cgi/trace`)
+  - ipify (`https://api.ipify.org?format=json`)
+  - ipwho.is (`https://ipwho.is/`)
+  - IP.SB (`https://api.ip.sb/geoip`)
+  - ip.guide (`https://ip.guide/`)
+  - SeeIP (`https://ip4.seeip.org/geoip`)
+  - icanhazip.com (`https://ipv4.icanhazip.com`)
+  - IPIP.net (`https://myip.ipip.net/json`)
+  - IP2Location (`/api/v1/ip2location`)
+- Results are clustered into consensus groups. A matching group indicates connection stability. Splintered groups indicate active split-tunneling, load-balancing, or proxy bypass.
+
+## 4. Privacy & Zero-Retention Architecture
+- **No IP Logging**: The server does not maintain an access log database or track client IP addresses.
+- **No Cookies / Trackers**: The application uses zero third-party tracking scripts, cookies, or tracking pixels.
+- **Local Storage Isolation**: IP connection history is stored exclusively in client-side `localStorage`. History can be wiped instantly or exported as CSV/JSON.

@@ -9,8 +9,34 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="My IP Info" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>My IP Info</title>
-    <meta name="description" content="Multi-source IP intelligence and connectivity diagnostic hub. Cross-checks Cloudflare Workers, public APIs, and WebRTC STUN." />
+    <link rel="canonical" href="https://ip.ii2d.com/" />
+
+    <!-- Primary Search Engine Metadata -->
+    <title>My IP Info | Multi-Source IP Intelligence & Network Diagnostic Hub</title>
+    <meta name="description" content="High-performance multi-source IP intelligence and network connectivity diagnostic suite. Cross-checks Cloudflare Edge, public APIs, and WebRTC STUN to detect VPN/proxy leaks and verify geolocation." />
+    <meta name="keywords" content="my ip, what is my ip, ip address lookup, ip intelligence, webrtc leak test, dns leak test, ipv4, ipv6, public ip, vpn leak test, ip geolocation, curl ifconfig, cloudflare worker" />
+    <meta name="author" content="ii2d" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="My IP Info" />
+    <meta property="og:url" content="https://ip.ii2d.com/" />
+    <meta property="og:title" content="My IP Info | Multi-Source IP Intelligence & Network Diagnostic Hub" />
+    <meta property="og:description" content="Cross-check your public IP, geolocation databases, WebRTC STUN leaks, and DNS resolvers in real-time across edge servers and public APIs." />
+    <meta property="og:image" content="https://ip.ii2d.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="My IP Info preview card showing IP address, edge diagnostic badges, and network topology" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://ip.ii2d.com/" />
+    <meta name="twitter:title" content="My IP Info | Multi-Source IP Intelligence & Network Diagnostic Hub" />
+    <meta name="twitter:description" content="Cross-check your public IP, geolocation databases, WebRTC STUN leaks, and DNS resolvers in real-time across edge servers and public APIs." />
+    <meta name="twitter:image" content="https://ip.ii2d.com/og-image.png" />
+    <meta name="twitter:creator" content="@ii2d" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,9 +45,217 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Structured Data: WebApplication & FAQPage Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://ip.ii2d.com/#webapp",
+          "name": "My IP Info",
+          "url": "https://ip.ii2d.com/",
+          "description": "High-performance multi-source IP intelligence and network connectivity diagnostic suite.",
+          "applicationCategory": "DiagnosticTool",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires JavaScript and HTML5 support. WebRTC optional for leak diagnostics.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "creator": {
+            "@type": "Organization",
+            "name": "ii2d",
+            "url": "https://ip.ii2d.com"
+          },
+          "featureList": [
+            "Multi-source IP consensus cross-validation",
+            "Zero-latency Cloudflare Edge geolocation and ASN lookup",
+            "Dual-stack WebRTC STUN candidate leak inspection",
+            "Recursive DNS leak diagnostics",
+            "Interactive geolocation convergence map",
+            "Terminal CLI support for curl, wget, and httpie",
+            "On-device local connection history with zero server logging"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://ip.ii2d.com/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is My IP Info?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "My IP Info is a real-time network intelligence and connectivity diagnostic tool. Unlike single-source lookup sites, it cross-checks your public IP address and geolocation across Cloudflare edge nodes, multiple public APIs, and browser WebRTC STUN candidates."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does multi-source IP cross-checking detect VPN or proxy leaks?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "When routing traffic through a VPN or proxy, certain browser subsystems or application sockets may bypass the encrypted tunnel. By simultaneously querying multiple independent external providers and WebRTC STUN servers, My IP Info highlights any discrepancy between reported IP addresses."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is a WebRTC leak?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A WebRTC leak occurs when a browser's Real-Time Communication engine exposes your true local or public IP address via Interactive Connectivity Establishment (ICE) STUN queries, bypassing active VPN tunnels or HTTP proxies. My IP Info tests client STUN candidates directly in your browser to flag exposed interfaces."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How can I check my IP address from the terminal using curl?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Run 'curl -sL https://ip.ii2d.com' or 'curl https://ip.ii2d.com/ip' in your terminal to receive your plain public IP address with a trailing newline. For structured JSON or YAML output, use 'curl https://ip.ii2d.com/api/v1/info?format=json' or '?format=yaml'."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is my IP address or network diagnostic data logged?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. My IP Info maintains a strict zero-logging and zero-caching policy. Edge API endpoints send no-store headers, and all connection history is saved strictly within your browser's local storage."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+    <style>
+      #root-fallback {
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #090d16;
+        color: #f1f5f9;
+        min-height: 100vh;
+        padding: 2.5rem 1.5rem;
+        max-width: 900px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+      #root-fallback h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+      }
+      #root-fallback .subtitle {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+      #root-fallback .card {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      #root-fallback h2 {
+        font-size: 1.3rem;
+        color: #e2e8f0;
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+      }
+      #root-fallback code {
+        font-family: 'JetBrains Mono', monospace;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        color: #38bdf8;
+        font-size: 0.9em;
+      }
+      #root-fallback pre {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      #root-fallback ul {
+        padding-left: 1.25rem;
+        color: #cbd5e1;
+      }
+      #root-fallback li {
+        margin-bottom: 0.5rem;
+      }
+      #root-fallback a {
+        color: #38bdf8;
+        text-decoration: none;
+      }
+      #root-fallback a:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="root-fallback">
+        <header>
+          <h1>My IP Info</h1>
+          <p class="subtitle">Multi-source IP intelligence and network connectivity diagnostic suite.</p>
+        </header>
+
+        <main>
+          <section class="card">
+            <h2>Multi-Source IP Cross-Validation</h2>
+            <p>
+              Most IP lookup utilities query a single server. My IP Info cross-validates client IP and network telemetry across
+              Cloudflare Edge, public IP providers (ipify, ipwho.is, IP.SB, ip.guide, SeeIP, icanhazip, IPIP.net), and browser
+              WebRTC STUN candidates to diagnose VPN/proxy bypasses, detect coordinate variance across geolocation databases, and measure round-trip latency.
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Fast CLI Terminal Access</h2>
+            <p>Query your IP directly from your terminal with curl or wget:</p>
+            <pre><code># Plain public IP
+curl -sL https://ip.ii2d.com
+
+# Formatted JSON diagnostic info
+curl -sL https://ip.ii2d.com/api/v1/info?format=json
+
+# YAML metadata
+curl -sL https://ip.ii2d.com/api/v1/info?format=yaml</code></pre>
+          </section>
+
+          <section class="card">
+            <h2>Comprehensive Diagnostics</h2>
+            <ul>
+              <li><strong>Zero-Latency Edge Geolocation:</strong> Extracts city, region, coordinates, and ASN directly from TLS connection headers.</li>
+              <li><strong>WebRTC STUN Leak Detection:</strong> Interrogates browser ICE candidates to detect unencrypted IP leaks across VPNs.</li>
+              <li><strong>DNS Leak Inspection:</strong> Resolves unique nonce queries to uncover upstream recursive DNS resolvers.</li>
+              <li><strong>Privacy Focused:</strong> Zero server-side IP logging and 100% on-device local storage history.</li>
+            </ul>
+          </section>
+
+          <section class="card">
+            <h2>AI & Agent Documentation</h2>
+            <p>
+              Machine-readable specifications for LLMs, search engines, and automated agents are available at:
+            </p>
+            <ul>
+              <li><a href="/llms.txt">/llms.txt</a> — Summary overview adhering to the llmstxt.org standard</li>
+              <li><a href="/llms-full.txt">/llms-full.txt</a> — Full technical specification, schemas, and error codes</li>
+              <li><a href="/sitemap.xml">/sitemap.xml</a> — XML Sitemap for crawler indexation</li>
+            </ul>
+          </section>
+        </main>
+      </div>
+    </div>
+    <noscript>
+      <div style="background: #090d16; color: #f1f5f9; padding: 2rem; text-align: center; font-family: sans-serif;">
+        <p>JavaScript is disabled in your browser. You can still use our CLI endpoint via <code>curl https://ip.ii2d.com</code> or view machine-readable docs at <a href="/llms.txt" style="color: #38bdf8;">/llms.txt</a>.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/client/main.tsx"></script>
   </body>
 </html>
