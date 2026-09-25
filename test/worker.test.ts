@@ -89,4 +89,38 @@ describe('Cloudflare Worker Pipeline Tests', () => {
     assert.equal(json.ip, '203.0.113.88');
     assert.equal(json.provider, 'cloudflare-worker');
   });
+
+  it('delegates /llms.txt, /llms-full.txt, /robots.txt, /sitemap.xml, and /og-image.png to env.ASSETS', async () => {
+    const requestedPaths: string[] = [];
+    const env = {
+      ASSETS: {
+        fetch: async (request: Request) => {
+          const u = new URL(request.url);
+          requestedPaths.push(u.pathname);
+          return new Response(`Content for ${u.pathname}`, { status: 200 });
+        },
+      },
+    };
+
+    for (const path of [
+      '/robots.txt',
+      '/sitemap.xml',
+      '/llms.txt',
+      '/llms-full.txt',
+      '/og-image.png',
+    ]) {
+      const req = new Request(`https://ip.example.com${path}`);
+      const res = await worker.fetch(req, env, dummyCtx);
+      assert.equal(res.status, 200);
+      assert.equal(await res.text(), `Content for ${path}`);
+    }
+
+    assert.deepEqual(requestedPaths, [
+      '/robots.txt',
+      '/sitemap.xml',
+      '/llms.txt',
+      '/llms-full.txt',
+      '/og-image.png',
+    ]);
+  });
 });

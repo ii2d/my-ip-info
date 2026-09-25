@@ -1,0 +1,50 @@
+# My IP Info
+
+> High-performance multi-source IP intelligence and network connectivity diagnostic suite. Cross-validates client IP and network data across Cloudflare Edge, public APIs, and WebRTC STUN candidates to detect VPN/proxy leaks, diagnose coordinate variations across geolocation databases, and measure real-time latency.
+
+## Overview
+My IP Info (https://ip.ii2d.com) is an open-source, edge-native web application and developer API. Unlike traditional single-source IP checkers, My IP Info probes multiple independent networks simultaneously to deliver an accurate consensus of public IP addresses, geolocation data, Autonomous System Numbers (ASN), ISP organizations, WebRTC STUN candidate exposure, and DNS resolver integrity.
+
+## Core Capabilities
+- **Multi-Source Cross-Validation**: Simultaneously interrogates Cloudflare Edge, Cloudflare Trace, ipify, ipwho.is, IP.SB, ip.guide, SeeIP, icanhazip.com, IPIP.net, and IP2Location to isolate discrepancy between providers.
+- **Zero-Latency Edge Geolocation**: Automatically extracts client city, region, country, latitude/longitude, ASN, organization, and airport datacenter code (colo) directly from Cloudflare TLS connection headers without external lookups.
+- **Dual-Stack WebRTC Leak Inspection**: Directly queries browser RTCPeerConnection STUN candidates across IPv4 and IPv6 to detect proxy/VPN bypass leaks.
+- **DNS Leak Diagnostics**: Resolves dynamic, single-use nonce subdomains to identify upstream recursive DNS resolvers and verify tunnel routing.
+- **On-Device Connection History**: Persists connection timeline snapshots locally in the user's browser with zero server-side logging.
+- **CLI & Automation Ready**: Returns raw plain-text IP strings to command-line tools (`curl`, `wget`, `httpie`) by default.
+
+## Fast CLI Terminal Usage
+```bash
+# Get raw public IP address
+curl -sL https://my-ip-info.ii2d-dev.workers.dev
+
+# Explicit plain IP endpoint
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/ip
+
+# Versioned plain IP endpoint
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip
+
+# Complete JSON diagnostic payload
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=json
+
+# YAML diagnostic payload
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=yaml
+
+# Direct edge geolocation JSON
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo
+```
+
+## API Reference
+- [Web Application](https://ip.ii2d.com/): Interactive React SPA diagnostic dashboard.
+- [Plain IP (Root CLI)](https://my-ip-info.ii2d-dev.workers.dev/): Instant public IP reflection for CLI tools (`curl`, `wget`, `httpie`).
+- [Plain IP Endpoint](https://my-ip-info.ii2d-dev.workers.dev/ip): Lightweight reflection of public IP with strict no-cache headers.
+- [Versioned Plain IP](https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip): Shorthand versioned endpoint returning plain IP with trailing newline.
+- [JSON/YAML Info Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/info): Content-negotiated diagnostic payload containing IP version, bogon check, provider name, timestamp, geolocation coordinates, and TLS metadata.
+- [Edge Geolocation Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo): Edge-extracted city, region, country, postal code, ASN, metro code, and colo datacenter.
+- [Health Check](https://my-ip-info.ii2d-dev.workers.dev/api/v1/health): Service status and software version.
+
+## Documentation & Machine-Readable Resources
+- [Detailed Technical Specification](https://ip.ii2d.com/llms-full.txt): Comprehensive API schemas, query parameters, security headers, and STUN/DNS test logic.
+- [Open Graph Card](https://ip.ii2d.com/og-image.png): Visual social preview image.
+- [XML Sitemap](https://ip.ii2d.com/sitemap.xml): Search engine indexing manifest.
+- [GitHub Repository](https://github.com/ii2d/my-ip-info): Source code, tests, and deployment documentation.

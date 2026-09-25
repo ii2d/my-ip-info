@@ -19,7 +19,10 @@ export const CliToolboxModal: React.FC<CliToolboxModalProps> = ({
 
   const baseEndpoint =
     cloudflareUrl ||
-    (typeof window !== 'undefined' ? window.location.origin : 'https://api.my-ip.info');
+    (typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? window.location.origin
+      : 'https://my-ip-info.ii2d-dev.workers.dev');
 
   const commands = [
     {
