@@ -144,6 +144,14 @@ headers:
   - IP2Location (`https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip2location`)
 - Results are clustered into consensus groups. A matching group indicates connection stability. Splintered groups indicate active split-tunneling, load-balancing, or proxy bypass.
 
+### D. IndexNow Search Engine Notification Protocol
+- **Specification**: Open standard created by Microsoft Bing and Yandex to push URL updates instantly to search engines.
+- **Verification Key**: `e860aba3b4ba1700c1f44fa0abd9376f`
+- **Key URL**: `https://ip.ii2d.com/e860aba3b4ba1700c1f44fa0abd9376f.txt`
+- **Submission Endpoint**: `https://api.indexnow.org/indexnow`
+- **Server API**: `GET /api/v1/indexnow` (status metadata) and `POST /api/v1/indexnow` (dispatch notification)
+- **Automated Trigger**: Executed automatically upon deployment in `.github/workflows/pages.yml` via `pnpm run indexnow`.
+
 ## 4. Privacy & Zero-Retention Architecture
 - **No IP Logging**: The server does not maintain an access log database or track client IP addresses.
 - **No Cookies / Trackers**: The application uses zero third-party tracking scripts, cookies, or tracking pixels.

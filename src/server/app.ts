@@ -1,6 +1,14 @@
 import { type Context, Hono } from 'hono';
 import { cors } from 'hono/cors';
 import packageJson from '../../package.json';
+import {
+  BING_INDEXNOW_ENDPOINT,
+  DEFAULT_INDEXNOW_HOST,
+  DEFAULT_INDEXNOW_KEY,
+  INDEXNOW_ENDPOINT,
+  type IndexNowSubmitOptions,
+  submitIndexNow,
+} from '../shared/indexnow';
 import { getIpVersion, isBogonIp } from '../shared/ip';
 import type { CloudflareCfData, IpInfoResponse } from '../shared/types';
 import { extractClientIp, extractCloudflareGeo } from './extractors';
@@ -10,6 +18,8 @@ export interface CreateAppOptions {
   providerName?: string;
   defaultGeo?: (ip: string) => Promise<IpInfoResponse['geo'] | undefined>;
   ip2LocationApiKey?: string;
+  indexNowKey?: string;
+  indexNowHost?: string;
   fetchFn?: typeof fetch;
 }
 
@@ -205,6 +215,54 @@ export function createIpApp(options: CreateAppOptions = {}) {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to query IP2Location';
       return c.json({ error: message }, 502);
+    }
+  });
+
+  // Dedicated IndexNow protocol endpoints
+  v1.get('/indexnow', (c: Context) => {
+    const key = options.indexNowKey || DEFAULT_INDEXNOW_KEY;
+    const host = options.indexNowHost || DEFAULT_INDEXNOW_HOST;
+    return c.json({
+      status: 'active',
+      protocol: 'IndexNow',
+      host,
+      keyConfigured: Boolean(key),
+      keyLocation: `https://${host}/${key}.txt`,
+      endpoints: [INDEXNOW_ENDPOINT, BING_INDEXNOW_ENDPOINT],
+    });
+  });
+
+  v1.post('/indexnow', async (c: Context) => {
+    let body: Partial<IndexNowSubmitOptions> = {};
+    try {
+      body = (await c.req.json()) as Partial<IndexNowSubmitOptions>;
+    } catch {
+      // Body can be omitted to trigger submission with default parameters
+    }
+
+    const host = body.host || options.indexNowHost || DEFAULT_INDEXNOW_HOST;
+    const key = body.key || options.indexNowKey || DEFAULT_INDEXNOW_KEY;
+    const urls =
+      body.urls && body.urls.length > 0
+        ? body.urls
+        : [`https://${host}/`, `https://${host}/llms.txt`, `https://${host}/llms-full.txt`];
+
+    try {
+      const result = await submitIndexNow(
+        {
+          host,
+          key,
+          urls,
+          keyLocation: body.keyLocation,
+          endpoint: body.endpoint,
+        },
+        options.fetchFn || fetch
+      );
+
+      return c.json(result, result.ok ? 200 : 502);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'IndexNow submission failed';
+      return c.json({ ok: false, error: message }, 400);
     }
   });
 

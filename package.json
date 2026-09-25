@@ -29,7 +29,9 @@
     "format:check": "biome format .",
     "pre-commit": "lint-staged",
     "prepare": "git config core.hooksPath .githooks",
-    "audit": "pnpm audit --registry=https://registry.npmjs.org/ --audit-level=high"
+    "audit": "pnpm audit --registry=https://registry.npmjs.org/ --audit-level=high",
+    "indexnow": "tsx scripts/submit-indexnow.ts",
+    "indexnow:dry-run": "tsx scripts/submit-indexnow.ts --dry-run"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
