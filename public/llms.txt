@@ -16,10 +16,13 @@ My IP Info (https://ip.ii2d.com) is an open-source, edge-native web application 
 ## Fast CLI Terminal Usage
 ```bash
 # Get raw public IP address
-curl -sL https://ip.ii2d.com
+curl -sL https://my-ip-info.ii2d-dev.workers.dev
 
 # Explicit plain IP endpoint
-curl -sL https://ip.ii2d.com/ip
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/ip
+
+# Versioned plain IP endpoint
+curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip
 
 # Complete JSON diagnostic payload
 curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=json
@@ -32,8 +35,10 @@ curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo
 ```
 
 ## API Reference
-- [Root CLI / Web](https://ip.ii2d.com/): Serves interactive React SPA to browsers; serves plain-text IP to CLI tools.
-- [Plain IP Endpoint](https://ip.ii2d.com/ip): Lightweight reflection of public IP with strict no-cache headers.
+- [Web Application](https://ip.ii2d.com/): Interactive React SPA diagnostic dashboard.
+- [Plain IP (Root CLI)](https://my-ip-info.ii2d-dev.workers.dev/): Instant public IP reflection for CLI tools (`curl`, `wget`, `httpie`).
+- [Plain IP Endpoint](https://my-ip-info.ii2d-dev.workers.dev/ip): Lightweight reflection of public IP with strict no-cache headers.
+- [Versioned Plain IP](https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip): Shorthand versioned endpoint returning plain IP with trailing newline.
 - [JSON/YAML Info Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/info): Content-negotiated diagnostic payload containing IP version, bogon check, provider name, timestamp, geolocation coordinates, and TLS metadata.
 - [Edge Geolocation Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo): Edge-extracted city, region, country, postal code, ASN, metro code, and colo datacenter.
 - [Health Check](https://my-ip-info.ii2d-dev.workers.dev/api/v1/health): Service status and software version.

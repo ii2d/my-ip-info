@@ -31,7 +31,8 @@ Access-Control-Expose-Headers: Content-Length, X-Client-IP
 ### Endpoints
 
 #### 1. Plaintext IP Reflection: `GET /` and `GET /ip`
-- **Path**: `/` (when `User-Agent` matches CLI tools like `curl`, `wget`, `httpie`, `fetch`, `aria2`, `urllib` or `Accept: text/plain`) or explicit `/ip`
+- **Host**: `https://my-ip-info.ii2d-dev.workers.dev` (Cloudflare Worker runtime)
+- **Path**: `/` (when `User-Agent` matches CLI tools like `curl`, `wget`, `httpie`, `fetch`, `aria2`, `urllib` or `Accept: text/plain`) or explicit `/ip` or `/api/v1/ip`
 - **Status**: `200 OK`
 - **Content-Type**: `text/plain; charset=utf-8`
 - **Headers**: `X-Client-IP: <client_ip>`

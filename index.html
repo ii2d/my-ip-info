@@ -113,7 +113,7 @@
               "name": "How can I check my IP address from the terminal using curl?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Run 'curl -sL https://ip.ii2d.com' or 'curl https://ip.ii2d.com/ip' in your terminal to receive your plain public IP address with a trailing newline. For structured JSON or YAML output, use 'curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=json' or '?format=yaml'."
+                "text": "Run 'curl -sL https://my-ip-info.ii2d-dev.workers.dev' or 'curl https://my-ip-info.ii2d-dev.workers.dev/ip' in your terminal to receive your plain public IP address with a trailing newline. For structured JSON or YAML output, use 'curl https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=json' or '?format=yaml'."
               }
             },
             {
@@ -218,7 +218,7 @@
             <h2>Fast CLI Terminal Access</h2>
             <p>Query your IP directly from your terminal with curl or wget:</p>
             <pre><code># Plain public IP
-curl -sL https://ip.ii2d.com
+curl -sL https://my-ip-info.ii2d-dev.workers.dev
 
 # Formatted JSON diagnostic info
 curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/info?format=json
