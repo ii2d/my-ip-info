@@ -42,9 +42,11 @@ curl -sL https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo
 - [JSON/YAML Info Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/info): Content-negotiated diagnostic payload containing IP version, bogon check, provider name, timestamp, geolocation coordinates, and TLS metadata.
 - [Edge Geolocation Endpoint](https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo): Edge-extracted city, region, country, postal code, ASN, metro code, and colo datacenter.
 - [Health Check](https://my-ip-info.ii2d-dev.workers.dev/api/v1/health): Service status and software version.
+- [IndexNow Status](https://my-ip-info.ii2d-dev.workers.dev/api/v1/indexnow): IndexNow protocol configuration and notification endpoints.
 
 ## Documentation & Machine-Readable Resources
 - [Detailed Technical Specification](https://ip.ii2d.com/llms-full.txt): Comprehensive API schemas, query parameters, security headers, and STUN/DNS test logic.
 - [Open Graph Card](https://ip.ii2d.com/og-image.png): Visual social preview image.
 - [XML Sitemap](https://ip.ii2d.com/sitemap.xml): Search engine indexing manifest.
+- [IndexNow Key](https://ip.ii2d.com/e860aba3b4ba1700c1f44fa0abd9376f.txt): IndexNow search engine key verification token.
 - [GitHub Repository](https://github.com/ii2d/my-ip-info): Source code, tests, and deployment documentation.

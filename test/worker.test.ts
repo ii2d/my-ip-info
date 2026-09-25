@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import worker from '../src/server/index';
+import { DEFAULT_INDEXNOW_KEY } from '../src/shared/indexnow';
 
 describe('Cloudflare Worker Pipeline Tests', () => {
   const dummyCtx = {
@@ -108,6 +109,7 @@ describe('Cloudflare Worker Pipeline Tests', () => {
       '/llms.txt',
       '/llms-full.txt',
       '/og-image.png',
+      `/${DEFAULT_INDEXNOW_KEY}.txt`,
     ]) {
       const req = new Request(`https://ip.example.com${path}`);
       const res = await worker.fetch(req, env, dummyCtx);
@@ -121,6 +123,14 @@ describe('Cloudflare Worker Pipeline Tests', () => {
       '/llms.txt',
       '/llms-full.txt',
       '/og-image.png',
+      `/${DEFAULT_INDEXNOW_KEY}.txt`,
     ]);
+  });
+  it('serves IndexNow key directly when env.ASSETS is undefined', async () => {
+    const req = new Request(`https://ip.example.com/${DEFAULT_INDEXNOW_KEY}.txt`);
+    const res = await worker.fetch(req, {}, dummyCtx);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('content-type'), 'text/plain; charset=utf-8');
+    assert.equal(await res.text(), `${DEFAULT_INDEXNOW_KEY}\n`);
   });
 });

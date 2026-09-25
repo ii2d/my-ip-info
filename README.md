@@ -175,10 +175,31 @@ All backend API routes are versioned under `/api/v1` and served from `https://my
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo` | `GET` | `application/json` | Geolocation data (city, region, country, lat/lon, ASN, datacenter colo) |
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/yaml` | `GET` | `text/yaml; charset=utf-8` | Client metadata and network details formatted as safe YAML |
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/health`| `GET` | `application/json` | Health check endpoint returning status and provider identifier |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/indexnow`| `GET` | `application/json` | IndexNow protocol configuration, host mapping, and endpoints |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/indexnow`| `POST` | `application/json` | Dispatches IndexNow push notifications for changed URLs |
+| `/e860aba3b4ba1700c1f44fa0abd9376f.txt` | `GET` | `text/plain` | IndexNow site ownership key verification file |
 | `/llms.txt` | `GET` | `text/plain; charset=utf-8` | Machine-readable context summary for LLMs, search engines, and AI agents |
 | `/llms-full.txt` | `GET` | `text/plain; charset=utf-8` | Exhaustive technical specification, API schemas, and diagnostic algorithms for AI reasoning |
 | `/sitemap.xml` | `GET` | `application/xml` | XML sitemap for search engine crawlers |
 | `/robots.txt` | `GET` | `text/plain` | Crawler and AI bot access policies |
+
+---
+
+## ⚡ IndexNow Support
+
+[IndexNow](https://www.indexnow.org/) is an open protocol that enables website owners to immediately notify participating search engines (Microsoft Bing, Yandex, Seznam.cz, Naver) whenever pages are added, updated, or deleted.
+
+- **Verification Key**: Hosted at `https://ip.ii2d.com/e860aba3b4ba1700c1f44fa0abd9376f.txt`
+- **CLI Submission**:
+  ```bash
+  # Submit all URLs from public/sitemap.xml to IndexNow
+  pnpm run indexnow
+
+  # Test submission payload locally without sending network requests
+  pnpm run indexnow:dry-run
+  ```
+- **Automated Deployment**: GitHub Actions runs IndexNow notification automatically on every production deploy in `.github/workflows/pages.yml`.
+- **API Endpoint**: `GET /api/v1/indexnow` inspects current protocol metadata, while `POST /api/v1/indexnow` accepts custom batch URL submission.
 
 ---
 
