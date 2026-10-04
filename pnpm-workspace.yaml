@@ -12,3 +12,7 @@ onlyBuiltDependencies:
 
 overrides:
   sharp: '>=0.35.4'
+  'brace-expansion@2': '^2.1.6'
+  'brace-expansion@4': '^5.0.12'
+  'brace-expansion@5': '^5.0.12'
+  'undici@>=7.0.0 <7.29.1': '>=7.29.1'

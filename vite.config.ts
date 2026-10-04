@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import packageJson from './package.json';
+import packageJson from './package.json' with { type: 'json' };
 
 function getAppVersion(): string {
   try {
@@ -74,7 +74,7 @@ export default defineConfig({
           /^\/sitemap\.xml/,
           /^\/llms(-full)?\.txt/,
         ],
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,txt,xml}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,txt,xml}'],
         cleanupOutdatedCaches: true,
       },
     }),
