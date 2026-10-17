@@ -18,6 +18,8 @@ export interface CreateAppOptions {
   providerName?: string;
   defaultGeo?: (ip: string) => Promise<IpInfoResponse['geo'] | undefined>;
   ip2LocationApiKey?: string;
+  ipGeolocationApiKey?: string;
+  ipgeolocationApiKey?: string;
   indexNowKey?: string;
   indexNowHost?: string;
   fetchFn?: typeof fetch;
@@ -214,6 +216,101 @@ export function createIpApp(options: CreateAppOptions = {}) {
       );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to query IP2Location';
+      return c.json({ error: message }, 502);
+    }
+  });
+
+  const getIpGeolocationApiKey = (c: Context): string | undefined => {
+    if (options.ipGeolocationApiKey) {
+      return options.ipGeolocationApiKey;
+    }
+    if (options.ipgeolocationApiKey) {
+      return options.ipgeolocationApiKey;
+    }
+    const env = c.env as Record<string, unknown> | undefined;
+    if (typeof env?.IPGEOLOCATION_API_KEY === 'string' && env.IPGEOLOCATION_API_KEY.trim()) {
+      return env.IPGEOLOCATION_API_KEY.trim();
+    }
+    if (typeof process !== 'undefined' && process.env?.IPGEOLOCATION_API_KEY?.trim()) {
+      return process.env.IPGEOLOCATION_API_KEY.trim();
+    }
+    return undefined;
+  };
+
+  // Dedicated IPGeolocation.io endpoint
+  v1.get('/ipgeolocation', async (c: Context) => {
+    const apiKey = getIpGeolocationApiKey(c);
+    if (!apiKey) {
+      return c.json(
+        {
+          error:
+            'No IPGeolocation API key provided in environment. In production, set the secret via `wrangler secret put IPGEOLOCATION_API_KEY` or Cloudflare Dashboard.',
+          configured: false,
+        },
+        200
+      );
+    }
+
+    const queryIp = c.req.query('ip')?.trim();
+    const clientIp = extractClientIp(c.req.raw.headers);
+    const targetIp = queryIp || clientIp;
+
+    c.header('X-Client-IP', targetIp);
+
+    try {
+      const url = new URL('https://api.ipgeolocation.io/v3/ipgeo');
+      url.searchParams.set('apiKey', apiKey);
+
+      if (queryIp) {
+        url.searchParams.set('ip', queryIp);
+      } else if (clientIp && clientIp !== '127.0.0.1' && clientIp !== '::1') {
+        url.searchParams.set('ip', clientIp);
+      }
+
+      const fetchImpl = options.fetchFn || fetch;
+      const response = await fetchImpl(url.toString(), {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      const creditsCharged = response.headers.get('x-credits-charged');
+      if (creditsCharged) {
+        c.header('X-Credits-Charged', creditsCharged);
+      }
+      const retryAfter = response.headers.get('retry-after');
+      if (retryAfter) {
+        c.header('Retry-After', retryAfter);
+      }
+
+      let data: Record<string, unknown> = {};
+      try {
+        data = (await response.json()) as Record<string, unknown>;
+      } catch {
+        data = { error: 'Invalid response from IPGeolocation API' };
+      }
+
+      if (response.status === 429) {
+        const errorMsg =
+          (typeof data.message === 'string' && data.message) ||
+          (typeof data.error === 'string' && data.error) ||
+          'IPGeolocation API usage limit reached (429 Too Many Requests). Daily free credit quota (1,000 requests) may be exhausted.';
+        return c.json(
+          {
+            ...data,
+            error: errorMsg,
+            status: 429,
+          },
+          429
+        );
+      }
+
+      return c.json(
+        data,
+        (response.status >= 200 && response.status < 600 ? response.status : 200) as 200
+      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to query IPGeolocation';
       return c.json({ error: message }, 502);
     }
   });

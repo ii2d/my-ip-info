@@ -142,6 +142,7 @@ headers:
   - icanhazip.com (`https://ipv4.icanhazip.com`)
   - IPIP.net (`https://myip.ipip.net/json`)
   - IP2Location (`https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip2location`)
+  - IPGeolocation (`https://my-ip-info.ii2d-dev.workers.dev/api/v1/ipgeolocation`)
 - Results are clustered into consensus groups. A matching group indicates connection stability. Splintered groups indicate active split-tunneling, load-balancing, or proxy bypass.
 
 ### D. IndexNow Search Engine Notification Protocol
