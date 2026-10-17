@@ -5,8 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
   schedule:
-    # Run weekly security audit every Monday at 04:00 UTC
+    # Run scheduled security audit & SBOM check every Monday at 04:00 UTC (or change to daily '0 4 * * *')
     - cron: '0 4 * * 1'
 
 concurrency:
@@ -73,5 +74,17 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Dependency Vulnerability Audit
+      - name: Dependency Vulnerability Audit (pnpm audit)
         run: pnpm run audit
+
+      - name: Generate CycloneDX SBOM
+        run: pnpm sbom --sbom-format cyclonedx --sbom-spec-version 1.6 --sbom-type application --out dist/sbom.cdx.json
+
+      - name: Scan CycloneDX SBOM with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'sbom'
+          scan-ref: 'dist/sbom.cdx.json'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'

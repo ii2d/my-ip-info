@@ -32,3 +32,15 @@ We take the security of **my-ip-info** seriously. If you discover a vulnerabilit
 - **Acknowledgment**: You will receive an initial response acknowledging receipt within **48 hours**.
 - **Assessment**: We will validate the report, determine severity, and keep you informed of remediation progress.
 - **Fix & Advisory**: Once resolved, we will release a patched version and publish a GitHub Security Advisory crediting your responsible disclosure.
+
+---
+
+## Software Bill of Materials (SBOM) & Supply Chain Security
+
+To ensure software supply chain transparency, **my-ip-info** generates a machine-readable Software Bill of Materials (SBOM) compliant with **OWASP CycloneDX 1.6**.
+
+- **Automated CI & Scheduled Audits**: On every push, PR, and scheduled security quality gate, CI runs both `pnpm audit` and a dedicated **Trivy CycloneDX SBOM vulnerability scan** across global CVE databases (NVD, GitHub Advisories, OSV).
+- **Local Generation**:
+  ```bash
+  pnpm sbom --sbom-format cyclonedx --sbom-spec-version 1.6 --sbom-type application --out dist/sbom.cdx.json
+  ```
