@@ -6,7 +6,7 @@
 My IP Info (https://ip.ii2d.com) is an open-source, edge-native web application and developer API. Unlike traditional single-source IP checkers, My IP Info probes multiple independent networks simultaneously to deliver an accurate consensus of public IP addresses, geolocation data, Autonomous System Numbers (ASN), ISP organizations, WebRTC STUN candidate exposure, and DNS resolver integrity.
 
 ## Core Capabilities
-- **Multi-Source Cross-Validation**: Simultaneously interrogates Cloudflare Edge, Cloudflare Trace, ipify, ipwho.is, IP.SB, ip.guide, SeeIP, icanhazip.com, IPIP.net, and IP2Location to isolate discrepancy between providers.
+- **Multi-Source Cross-Validation**: Simultaneously interrogates Cloudflare Edge, Cloudflare Trace, ipify, ipwho.is, IP.SB, ip.guide, SeeIP, icanhazip.com, IPIP.net, IP2Location, and IPGeolocation to isolate discrepancy between providers.
 - **Zero-Latency Edge Geolocation**: Automatically extracts client city, region, country, latitude/longitude, ASN, organization, and airport datacenter code (colo) directly from Cloudflare TLS connection headers without external lookups.
 - **Dual-Stack WebRTC Leak Inspection**: Directly queries browser RTCPeerConnection STUN candidates across IPv4 and IPv6 to detect proxy/VPN bypass leaks.
 - **DNS Leak Diagnostics**: Resolves dynamic, single-use nonce subdomains to identify upstream recursive DNS resolvers and verify tunnel routing.

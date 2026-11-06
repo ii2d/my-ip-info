@@ -54,6 +54,7 @@ jobs:
           VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || '/' }}
           VITE_BACKEND_URL: ${{ inputs.backend_url || vars.VITE_BACKEND_URL || vars.BACKEND_URL || 'https://my-ip-info.ii2d-dev.workers.dev' }}
           VITE_ENABLE_IP2LOCATION: ${{ vars.ENABLE_IP2LOCATION || 'true' }}
+          VITE_ENABLE_IPGEOLOCATION: ${{ vars.ENABLE_IPGEOLOCATION || 'true' }}
           FRONTEND_DOMAIN: ${{ inputs.frontend_domain || vars.FRONTEND_DOMAIN || vars.CUSTOM_DOMAIN || 'ip.ii2d.com' }}
         run: |
           pnpm run build:pages

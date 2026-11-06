@@ -115,13 +115,14 @@ pnpm deploy
 
 Wrangler will authenticate via your browser or respect your standard `CLOUDFLARE_API_TOKEN` environment variable.
 
-### Secrets & API Keys (e.g. IP2Location)
+### Secrets & API Keys (e.g. IP2Location & IPGeolocation)
 
 Cloudflare Workers isolates local dev environment variables from deployed production secrets:
 - **Local Development**: `wrangler dev` automatically reads `.env`.
 - **Production Deployment**: `wrangler deploy` does not upload `.env`. To upload your secret directly from `.env` without manual typing:
   ```bash
   pnpm run secret:ip2location
+  pnpm run secret:ipgeolocation
   ```
   Secrets can also be added via the Cloudflare Dashboard (**Workers & Pages > my-ip-info > Settings > Variables and Secrets**).
 
@@ -146,6 +147,7 @@ The frontend can be deployed independently to GitHub Pages via [.github/workflow
 | `VITE_BACKEND_URL` / `BACKEND_URL` | Cloudflare Worker or backend API endpoint URL | `https://my-ip-info.ii2d-dev.workers.dev` |
 | `FRONTEND_DOMAIN` / `CUSTOM_DOMAIN` | Custom domain written to `CNAME` for GitHub Pages | `ip.ii2d.com` |
 | `ENABLE_IP2LOCATION` | Enable or disable IP2Location.io provider (`'true'` / `'false'`) | `true` |
+| `ENABLE_IPGEOLOCATION` | Enable or disable IPGeolocation.io provider (`'true'` / `'false'`) | `true` |
 | `VITE_BASE_PATH` | Base path for GitHub Pages if not using root custom domain | `/` |
 
 Manual workflow runs via `workflow_dispatch` also provide optional inputs to override `backend_url` and `frontend_domain` on demand.
@@ -173,6 +175,8 @@ All backend API routes are versioned under `/api/v1` and served from `https://my
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/info` | `GET` | `text/plain` or `application/json` or `text/yaml` | Smart content negotiation: returns plaintext for CLI or JSON for browsers. Supports explicit query override: `?format=json`, `?format=yaml`, `?format=text`, `?format=ip` |
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip` | `GET` | `text/plain; charset=utf-8` | Returns raw public client IP address with a trailing newline |
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/geo` | `GET` | `application/json` | Geolocation data (city, region, country, lat/lon, ASN, datacenter colo) |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/ip2location` | `GET` | `application/json` | Dedicated IP2Location.io proxy endpoint with server-side API key injection |
+| `https://my-ip-info.ii2d-dev.workers.dev/api/v1/ipgeolocation` | `GET` | `application/json` | Dedicated IPGeolocation.io proxy endpoint with server-side API key injection |
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/yaml` | `GET` | `text/yaml; charset=utf-8` | Client metadata and network details formatted as safe YAML |
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/health`| `GET` | `application/json` | Health check endpoint returning status and provider identifier |
 | `https://my-ip-info.ii2d-dev.workers.dev/api/v1/indexnow`| `GET` | `application/json` | IndexNow protocol configuration, host mapping, and endpoints |

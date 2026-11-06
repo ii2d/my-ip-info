@@ -8,6 +8,7 @@ export interface Env {
     fetch: (request: Request) => Promise<Response>;
   };
   IP2_LOCATION_API_KEY?: string;
+  IPGEOLOCATION_API_KEY?: string;
   INDEXNOW_KEY?: string;
   INDEXNOW_HOST?: string;
 }
