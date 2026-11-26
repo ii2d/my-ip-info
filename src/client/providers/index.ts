@@ -365,6 +365,132 @@ export function getSelfHostedProviders(config: { cloudflareUrl?: string }): IpPr
     });
   }
 
+  // Only include IPGeolocation if enabled via environment variable
+  const isIpGeolocationEnabled =
+    metaEnv?.VITE_ENABLE_IPGEOLOCATION === 'true' ||
+    (typeof process !== 'undefined' && process.env?.VITE_ENABLE_IPGEOLOCATION === 'true');
+  if (isIpGeolocationEnabled) {
+    const ipGeoDisplay = baseUrl
+      ? `${baseUrl}/api/v1/ipgeolocation`
+      : 'Self-Hosted IPGeolocation.io';
+    providers.push({
+      id: 'self-ipgeolocation',
+      name: 'IPGeolocation.io (Self-Hosted)',
+      category: 'self-hosted',
+      regionTag: 'IPGeolocation Global',
+      endpointUrl: ipGeoDisplay,
+      description: 'Self-hosted IP intelligence powered by IPGeolocation.io API',
+      fetchIp: async (signal?: AbortSignal) => {
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+        const urlObj = baseUrl
+          ? new URL('/api/v1/ipgeolocation', baseUrl)
+          : new URL('/api/v1/ipgeolocation', origin);
+        urlObj.searchParams.set('t', Date.now().toString());
+
+        const res = await fetch(urlObj.toString(), {
+          signal,
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) {
+          let errorMsg = `HTTP ${res.status}`;
+          try {
+            const errJson = await res.json();
+            if (errJson.message) errorMsg = errJson.message;
+            else if (errJson.error) errorMsg = errJson.error;
+          } catch {
+            // ignore
+          }
+
+          if (res.status === 429) {
+            const isLimitMentioned =
+              errorMsg.toLowerCase().includes('limit') ||
+              errorMsg.toLowerCase().includes('quota') ||
+              errorMsg.toLowerCase().includes('credit');
+            throw new Error(
+              isLimitMentioned
+                ? errorMsg
+                : `IPGeolocation daily credit limit reached (1,000 requests/day): ${errorMsg}`
+            );
+          }
+
+          throw new Error(errorMsg);
+        }
+        const data = await res.json();
+
+        if (data.configured === false || data.error || (!data.ip && data.message)) {
+          throw new Error(data.error || data.message || 'IPGeolocation API is not configured');
+        }
+
+        if (data.status === 429) {
+          throw new Error(
+            data.error ||
+              data.message ||
+              'IPGeolocation daily credit limit reached (1,000 requests/day)'
+          );
+        }
+
+        if (!data.ip) {
+          throw new Error('No IP returned from IPGeolocation');
+        }
+
+        const ip = String(data.ip).trim();
+        const city = data.location?.city || data.city;
+        const region = data.location?.state_prov || data.state_prov;
+        const regionCode = data.location?.state_code || data.state_code;
+        const country = data.location?.country_name || data.country_name;
+        const countryCode = data.location?.country_code2 || data.country_code2;
+        const continent = data.location?.continent_name || data.continent_name;
+        const postalCode = data.location?.zipcode || data.zipcode;
+        const rawLat = data.location?.latitude ?? data.latitude;
+        const rawLon = data.location?.longitude ?? data.longitude;
+        const lat =
+          typeof rawLat === 'number'
+            ? rawLat
+            : typeof rawLat === 'string' && rawLat.trim() && !Number.isNaN(Number(rawLat))
+              ? Number(rawLat)
+              : undefined;
+        const lon =
+          typeof rawLon === 'number'
+            ? rawLon
+            : typeof rawLon === 'string' && rawLon.trim() && !Number.isNaN(Number(rawLon))
+              ? Number(rawLon)
+              : undefined;
+        const asn = data.asn?.as_number
+          ? String(data.asn.as_number).startsWith('AS')
+            ? String(data.asn.as_number)
+            : `AS${data.asn.as_number}`
+          : undefined;
+        const asOrg = data.asn?.organization || data.organization || data.isp;
+        const timezone =
+          typeof data.time_zone === 'object' && data.time_zone?.name
+            ? data.time_zone.name
+            : typeof data.time_zone === 'string'
+              ? data.time_zone
+              : undefined;
+
+        return {
+          ip,
+          version: getIpVersion(ip),
+          geo: {
+            city: city && city !== '-' ? city : undefined,
+            region: region && region !== '-' ? region : undefined,
+            regionCode: regionCode && regionCode !== '-' ? regionCode : undefined,
+            country: country && country !== '-' ? country : undefined,
+            countryCode: countryCode && countryCode !== '-' ? countryCode : undefined,
+            continent: continent && continent !== '-' ? continent : undefined,
+            latitude: lat,
+            longitude: lon,
+            postalCode: postalCode && postalCode !== '-' ? postalCode : undefined,
+            timezone: timezone && timezone !== '-' ? timezone : undefined,
+            asn: asn && asn !== '-' ? asn : undefined,
+            asOrganization: asOrg && asOrg !== '-' ? asOrg : undefined,
+          },
+        };
+      },
+    });
+  }
+
   return providers;
 }
 

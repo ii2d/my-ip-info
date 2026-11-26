@@ -181,4 +181,130 @@ describe('Provider Resolution Tests', () => {
       globalThis.fetch = origFetch;
     }
   });
+
+  it('includes IPGeolocation provider when VITE_ENABLE_IPGEOLOCATION is true', async () => {
+    const origEnv = process.env.VITE_ENABLE_IPGEOLOCATION;
+    const origFetch = globalThis.fetch;
+
+    try {
+      process.env.VITE_ENABLE_IPGEOLOCATION = 'true';
+      const providers = getSelfHostedProviders({});
+      assert.equal(providers.length, 2);
+
+      const ipgeo = providers.find((p) => p.id === 'self-ipgeolocation');
+      assert.ok(ipgeo);
+      assert.equal(ipgeo.name, 'IPGeolocation.io (Self-Hosted)');
+
+      globalThis.fetch = async () => {
+        return new Response(
+          JSON.stringify({
+            ip: '8.8.8.8',
+            location: {
+              continent_name: 'North America',
+              country_code2: 'US',
+              country_name: 'United States',
+              state_prov: 'California',
+              state_code: 'US-CA',
+              city: 'Mountain View',
+              zipcode: '94043',
+              latitude: '37.42240',
+              longitude: '-122.08421',
+            },
+            time_zone: {
+              name: 'America/Los_Angeles',
+            },
+            asn: {
+              as_number: '15169',
+              organization: 'Google LLC',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      };
+
+      const result = await ipgeo.fetchIp();
+      assert.equal(result.ip, '8.8.8.8');
+      assert.equal(result.version, 'IPv4');
+      assert.equal(result.geo?.city, 'Mountain View');
+      assert.equal(result.geo?.region, 'California');
+      assert.equal(result.geo?.regionCode, 'US-CA');
+      assert.equal(result.geo?.countryCode, 'US');
+      assert.equal(result.geo?.continent, 'North America');
+      assert.equal(result.geo?.postalCode, '94043');
+      assert.equal(result.geo?.latitude, 37.4224);
+      assert.equal(result.geo?.longitude, -122.08421);
+      assert.equal(result.geo?.timezone, 'America/Los_Angeles');
+      assert.equal(result.geo?.asn, 'AS15169');
+      assert.equal(result.geo?.asOrganization, 'Google LLC');
+    } finally {
+      process.env.VITE_ENABLE_IPGEOLOCATION = origEnv;
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it('rejects when IPGeolocation API returns configured=false or error message', async () => {
+    const origEnv = process.env.VITE_ENABLE_IPGEOLOCATION;
+    const origFetch = globalThis.fetch;
+
+    try {
+      process.env.VITE_ENABLE_IPGEOLOCATION = 'true';
+      const providers = getSelfHostedProviders({});
+      const ipgeo = providers.find((p) => p.id === 'self-ipgeolocation');
+      assert.ok(ipgeo);
+
+      globalThis.fetch = async () => {
+        return new Response(
+          JSON.stringify({
+            error: 'No IPGeolocation API key provided in environment',
+            configured: false,
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      };
+
+      await assert.rejects(async () => {
+        await ipgeo.fetchIp();
+      }, /No IPGeolocation API key provided in environment/);
+
+      globalThis.fetch = async () => {
+        return new Response(
+          JSON.stringify({
+            message: 'Provided API key is not valid.',
+          }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      };
+
+      await assert.rejects(async () => {
+        await ipgeo.fetchIp();
+      }, /Provided API key is not valid/);
+
+      globalThis.fetch = async () => {
+        return new Response(
+          JSON.stringify({
+            message: 'API usage limit has been reached for the free subscriptions.',
+          }),
+          { status: 429, headers: { 'Content-Type': 'application/json' } }
+        );
+      };
+
+      await assert.rejects(async () => {
+        await ipgeo.fetchIp();
+      }, /API usage limit has been reached/);
+
+      globalThis.fetch = async () => {
+        return new Response(JSON.stringify({}), {
+          status: 429,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      };
+
+      await assert.rejects(async () => {
+        await ipgeo.fetchIp();
+      }, /IPGeolocation daily credit limit reached \(1,000 requests\/day\)/);
+    } finally {
+      process.env.VITE_ENABLE_IPGEOLOCATION = origEnv;
+      globalThis.fetch = origFetch;
+    }
+  });
 });
